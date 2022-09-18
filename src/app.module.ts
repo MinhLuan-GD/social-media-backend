@@ -11,6 +11,7 @@ import { UsersModule } from '@users/users.module';
 import { AuthModule } from '@auth/auth.module';
 import { PostsModule } from '@posts/posts.module';
 import { ReactsModule } from '@reacts/reacts.module';
+import { UploadsModule } from '@uploads/uploads.module';
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { ReactsModule } from '@reacts/reacts.module';
     AuthModule,
     PostsModule,
     ReactsModule,
+    UploadsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
