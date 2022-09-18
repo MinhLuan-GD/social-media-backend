@@ -1,3 +1,4 @@
+import { URL_D_PIC } from '@config/async.config';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import mongoose, { Document } from 'mongoose';
 import { Details, DetailsSchema } from './details.schema';
@@ -25,8 +26,7 @@ export class User {
 
   @Prop({
     trim: true,
-    default:
-      'https://res.cloudinary.com/same-cloud/image/upload/v1662905666/d_pic_o44tju.png',
+    default: URL_D_PIC,
   })
   picture: string;
 
