@@ -7,6 +7,7 @@ import { AppService } from '@/app.service';
 import { configOpts, mailOpts } from '@config/async.config';
 import { mongoOpts } from '@databases';
 import { LoggerModule } from '@logger/logger.module';
+import { UsersModule } from './users/users.module';
 
 @Module({
   imports: [
@@ -14,6 +15,7 @@ import { LoggerModule } from '@logger/logger.module';
     MongooseModule.forRootAsync(mongoOpts),
     MailerModule.forRootAsync(mailOpts),
     LoggerModule,
+    UsersModule,
   ],
   controllers: [AppController],
   providers: [AppService],
