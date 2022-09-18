@@ -7,8 +7,9 @@ import { AppService } from '@/app.service';
 import { configOpts, mailOpts } from '@config/async.config';
 import { mongoOpts } from '@databases';
 import { LoggerModule } from '@logger/logger.module';
-import { UsersModule } from './users/users.module';
-import { AuthModule } from './auth/auth.module';
+import { UsersModule } from '@users/users.module';
+import { AuthModule } from '@auth/auth.module';
+import { PostsModule } from '@posts/posts.module';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { AuthModule } from './auth/auth.module';
     LoggerModule,
     UsersModule,
     AuthModule,
+    PostsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
