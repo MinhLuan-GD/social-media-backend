@@ -1,7 +1,7 @@
 import { ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { v2 } from 'cloudinary';
-import compression from 'compression';
+import * as compression from 'compression';
 import { AppModule } from '@/app.module';
 import { corsOpts, compressionOpts, cloudinaryOpts } from '@config/sync.config';
 import { HttpExceptionFilter } from '@exceptions/http-exception.filter';
