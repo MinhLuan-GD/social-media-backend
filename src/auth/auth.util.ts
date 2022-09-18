@@ -2,7 +2,7 @@ import { UsersService } from '@users/users.service';
 import { JwtService } from '@nestjs/jwt';
 import { OAuth2Client } from 'google-auth-library';
 import { MailerService } from '@nestjs-modules/mailer';
-import { MyLogger } from '@/logger/logger.service';
+import { MyLogger } from '@logger/logger.service';
 import { Injectable } from '@nestjs/common';
 
 @Injectable()
