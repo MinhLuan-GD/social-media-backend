@@ -8,10 +8,21 @@ import { PassportModule } from '@nestjs/passport';
 import { JwtStrategy } from './jwt.strategy';
 import { LocalStrategy } from './local.strategy';
 import { AuthUtil } from './auth.util';
+import { APP_GUARD } from '@nestjs/core';
+import { ThrottlerGuard } from '@nestjs/throttler';
 
 @Module({
   imports: [UsersModule, PassportModule, JwtModule.registerAsync(jwtOpts)],
-  providers: [AuthService, LocalStrategy, JwtStrategy, AuthUtil],
+  providers: [
+    AuthService,
+    LocalStrategy,
+    JwtStrategy,
+    AuthUtil,
+    {
+      provide: APP_GUARD,
+      useClass: ThrottlerGuard,
+    },
+  ],
   controllers: [AuthController],
   exports: [AuthService],
 })
