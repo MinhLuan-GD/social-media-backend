@@ -1,0 +1,34 @@
+version: "3.9"
+
+services:
+  db:
+    container_name: database
+    image: mongo:4.2.22
+    restart: always
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=${DB_USERNAME}
+      - MONGO_INITDB_ROOT_PASSWORD=${DB_PASSWORD}
+    command: mongod
+    volumes:
+      - db:/data/db
+
+  store:
+    container_name: store
+    image: redis:7.0.4-bullseye
+    restart: always
+    command: redis-server --save 60 1 --loglevel warning --requirepass ${STORE_PASSWORD}
+    volumes:
+      - store:/data
+
+  api:
+    build: .
+    container_name: api
+    ports:
+      - ${PORT}:${PORT}
+    depends_on:
+      - db
+      - store
+
+volumes:
+  db: {}
+  store: {}
