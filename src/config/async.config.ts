@@ -11,7 +11,7 @@ const URL_D_PIC =
   'https://res.cloudinary.com/same-cloud/image/upload/v1662905666/d_pic_o44tju.png';
 
 const configOpts: ConfigModuleOptions = {
-  envFilePath: `${process.env.NODE_ENV}.env`,
+  envFilePath: `.env/${process.env.NODE_ENV}.env`,
   validate,
 };
 
