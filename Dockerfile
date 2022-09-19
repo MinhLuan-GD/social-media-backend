@@ -6,4 +6,4 @@ WORKDIR /app
 
 RUN npm ci
 
-CMD ["npm", "start"]
+CMD ["npm", "run", "start:docker-dev"]
