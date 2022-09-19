@@ -62,6 +62,12 @@ class EnvironmentVariables {
   @IsString()
   ORIGIN: string;
 
+  @IsInt()
+  THROTTLE_TTL: number;
+
+  @IsInt()
+  THROTTLE_LIMIT: number;
+
   @IsEmail()
   EMAIL: string;
 

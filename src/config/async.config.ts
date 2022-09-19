@@ -6,6 +6,7 @@ import {
   ConfigService,
 } from '@nestjs/config';
 import { JwtModuleAsyncOptions } from '@nestjs/jwt';
+import { ThrottlerAsyncOptions } from '@nestjs/throttler';
 
 const URL_D_PIC =
   'https://res.cloudinary.com/same-cloud/image/upload/v1662905666/d_pic_o44tju.png';
@@ -43,4 +44,13 @@ const mailOpts: MailerAsyncOptions = {
   inject: [ConfigService],
 };
 
-export { configOpts, jwtOpts, mailOpts, URL_D_PIC };
+const throttlerOpts: ThrottlerAsyncOptions = {
+  imports: [ConfigModule],
+  useFactory: async (config: ConfigService) => ({
+    ttl: config.get('THROTTLE_TTL'),
+    limit: config.get('THROTTLE_LIMIT'),
+  }),
+  inject: [ConfigService],
+};
+
+export { URL_D_PIC, configOpts, jwtOpts, mailOpts, throttlerOpts };
