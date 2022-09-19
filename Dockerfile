@@ -4,6 +4,6 @@ COPY . ./app
 
 WORKDIR /app
 
-RUN npm ci
+RUN npm i
 
 CMD ["npm", "run", "start:docker-dev"]
