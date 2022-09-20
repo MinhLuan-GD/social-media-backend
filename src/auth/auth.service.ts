@@ -111,7 +111,8 @@ export class AuthService extends AuthUtil {
         HttpStatus.UNAUTHORIZED,
       );
     }
-    return 'ok';
+    const payload = { id: user._id };
+    return this.getToken(payload, '10m');
   }
 
   async changePassword(email: string, iPassword: string) {

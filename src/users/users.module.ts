@@ -4,7 +4,7 @@ import { UsersController } from './users.controller';
 import { MongooseModule } from '@nestjs/mongoose';
 import { User, UserSchema } from './schemas/user.schema';
 import { Post, PostSchema } from '@posts/schemas/post.schema';
-import { userCacheOpts } from '@/cache';
+import { userCacheOpts } from '@cache';
 
 @Module({
   imports: [

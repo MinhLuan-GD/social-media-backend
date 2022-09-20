@@ -9,6 +9,7 @@ import {
   Body,
   Patch,
   Put,
+  Post,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 
@@ -16,8 +17,8 @@ import { UsersService } from './users.service';
 export class UsersController {
   constructor(private usersService: UsersService) {}
 
-  @Get('get-user-picture/:email')
-  async getUserPicture(@Param('email') email: string) {
+  @Post('get-user-picture')
+  async getUserPicture(@Body('email') email: string) {
     return this.usersService.getUserPicture(email);
   }
 

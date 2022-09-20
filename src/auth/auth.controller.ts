@@ -67,6 +67,7 @@ export class AuthController {
     return this.authService.validateResetCode(email, code);
   }
 
+  @UseGuards(JwtAuthGuard)
   @Post('change-password')
   async changePassword(@Body() body: { email: string; password: string }) {
     const { email, password } = body;
