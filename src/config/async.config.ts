@@ -7,6 +7,8 @@ import {
 } from '@nestjs/config';
 import { JwtModuleAsyncOptions } from '@nestjs/jwt';
 import { ThrottlerAsyncOptions } from '@nestjs/throttler';
+import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
+import { join } from 'path';
 
 const URL_D_PIC =
   'https://res.cloudinary.com/same-cloud/image/upload/v1662905666/d_pic_o44tju.png';
@@ -39,6 +41,11 @@ const mailOpts: MailerAsyncOptions = {
         clientId: config.get('MAILING_ID'),
         clientSecret: config.get('MAILING_SECRET'),
       },
+    },
+    template: {
+      dir: join(process.cwd(), 'dist/auth/mail/templates'),
+      adapter: new HandlebarsAdapter(),
+      options: { strict: true },
     },
   }),
   inject: [ConfigService],

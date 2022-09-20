@@ -4,6 +4,7 @@ import { OAuth2Client } from 'google-auth-library';
 import { MailerService } from '@nestjs-modules/mailer';
 import { MyLogger } from '@logger/logger.service';
 import { Injectable } from '@nestjs/common';
+import { join } from 'path';
 
 @Injectable()
 export class AuthUtil {
@@ -47,7 +48,8 @@ export class AuthUtil {
       from: process.env.EMAIL,
       to: email,
       subject: 'Email verification',
-      html: `Hello ${name}, link: ${url}`,
+      template: './confirmation',
+      context: { name, url },
       auth: {
         refreshToken: process.env.MAILING_REFRESH,
         accessToken: myAccessToken,
@@ -66,7 +68,8 @@ export class AuthUtil {
       from: process.env.EMAIL,
       to: email,
       subject: 'Email reset password',
-      html: `Hello ${name}, your code: ${code}`,
+      template: './resetPass',
+      context: { name, code },
       auth: {
         refreshToken: process.env.MAILING_REFRESH,
         accessToken: myAccessToken,
