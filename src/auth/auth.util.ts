@@ -4,7 +4,6 @@ import { OAuth2Client } from 'google-auth-library';
 import { MailerService } from '@nestjs-modules/mailer';
 import { MyLogger } from '@logger/logger.service';
 import { Injectable } from '@nestjs/common';
-import { join } from 'path';
 
 @Injectable()
 export class AuthUtil {
