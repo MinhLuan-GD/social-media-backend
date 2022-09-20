@@ -3,7 +3,7 @@ version: "3.9"
 services:
   db:
     container_name: database
-    image: mongo:4.2.22
+    image: mongo:${MONGO_TAG}
     restart: always
     environment:
       - MONGO_INITDB_ROOT_USERNAME=${DB_USERNAME}
@@ -14,7 +14,7 @@ services:
 
   store:
     container_name: store
-    image: redis:7.0.4-bullseye
+    image: redis:${REDIS_TAG}
     restart: always
     command: redis-server --save 60 1 --loglevel warning --requirepass ${STORE_PASSWORD}
     volumes:
