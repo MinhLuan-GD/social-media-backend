@@ -1,6 +1,6 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { UploadUtil } from './uploads.util';
-import { v2 } from 'cloudinary';
+import { v2 as cloudinary } from 'cloudinary';
 
 @Injectable()
 export class UploadsService {
@@ -11,7 +11,7 @@ export class UploadsService {
     path: string,
   ): Promise<{ url: string }> {
     return new Promise((resolve) => {
-      v2.uploader.upload(
+      cloudinary.uploader.upload(
         file.path,
         { folder: `facebook-clone/${path}` },
         (err, res) => {
@@ -29,7 +29,7 @@ export class UploadsService {
   }
 
   async listImages(path: string, sort: 'asc' | 'desc', max: number) {
-    return v2.search
+    return cloudinary.search
       .expression(`facebook-clone/${path}`)
       .sort_by('created_at', `${sort}`)
       .max_results(max)

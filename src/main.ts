@@ -1,6 +1,6 @@
 import { ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
-import { v2 } from 'cloudinary';
+import { v2 as cloadinary } from 'cloudinary';
 import * as compression from 'compression';
 import { AppModule } from '@/app.module';
 import { corsOpts, compressionOpts, cloudinaryOpts } from '@config/sync.config';
@@ -15,7 +15,7 @@ async function bootstrap() {
   app.enableCors(corsOpts);
   app.use(helmet());
   app.use(compression(compressionOpts));
-  v2.config(cloudinaryOpts);
+  cloadinary.config(cloudinaryOpts);
   await app.listen(process.env.PORT || 8000);
 }
 bootstrap();
