@@ -2,10 +2,10 @@ import { Schema, Prop, SchemaFactory } from '@nestjs/mongoose';
 
 @Schema({ _id: false, timestamps: true })
 export class Message {
-  @Prop()
+  @Prop({ required: true })
   sender: string;
 
-  @Prop()
+  @Prop({ default: '' })
   text: string;
 }
 

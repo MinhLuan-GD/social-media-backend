@@ -6,11 +6,13 @@ import {
   ConversationSchema,
 } from './schemas/conversation.schema';
 import { MongooseModule } from '@nestjs/mongoose';
+import { User, UserSchema } from '@users/schemas/user.schema';
 
 @Module({
   imports: [
     MongooseModule.forFeature([
       { name: Conversation.name, schema: ConversationSchema },
+      { name: User.name, schema: UserSchema },
     ]),
   ],
   providers: [ChatService],

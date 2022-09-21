@@ -5,7 +5,7 @@ import { Message, MessageSchema } from './message.schema';
 
 export type ConversationDocument = Conversation & Document;
 
-@Schema({ collection: 'conversations', timestamps: true })
+@Schema({ collection: 'conversations' })
 export class Conversation {
   @Prop({
     type: [
@@ -15,9 +15,9 @@ export class Conversation {
       },
     ],
   })
-  users: User[];
+  members: User[];
 
-  @Prop([MessageSchema])
+  @Prop({ type: [MessageSchema], default: [] })
   messages: Message[];
 }
 
