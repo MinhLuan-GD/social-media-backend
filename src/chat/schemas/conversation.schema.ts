@@ -15,7 +15,7 @@ export class Conversation {
       },
     ],
   })
-  user: User[];
+  users: User[];
 
   @Prop([MessageSchema])
   messages: Message[];
