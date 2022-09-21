@@ -1,6 +1,7 @@
 import { User } from '@users/schemas/user.schema';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import mongoose, { Document } from 'mongoose';
+import { Message, MessageSchema } from './message.schema';
 
 export type ConversationDocument = Conversation & Document;
 
@@ -15,6 +16,9 @@ export class Conversation {
     ],
   })
   user: User[];
+
+  @Prop([MessageSchema])
+  messages: Message[];
 }
 
 export const ConversationSchema = SchemaFactory.createForClass(Conversation);
