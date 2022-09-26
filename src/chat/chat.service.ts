@@ -1,7 +1,7 @@
 import { User, UserDocument } from '@users/schemas/user.schema';
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import mongoose, { Model, Types } from 'mongoose';
+import { Model, Types } from 'mongoose';
 import {
   Conversation,
   ConversationDocument,
@@ -15,7 +15,7 @@ export class ChatService {
   @InjectModel(User.name)
   private usersModel: Model<UserDocument>;
 
-  async conversations(id: string, search = '', skip = 0) {
+  async conversations(id: string, skip = 0) {
     const { friends } = await this.usersModel.findById(id).lean();
     const conversations: Conversation[] = [];
     const start = skip * 10;
@@ -55,6 +55,9 @@ export class ChatService {
   }
 
   async addMessage(sender: string, user: string, text: string) {
+    if (sender == user) {
+      throw new HttpException('Sender is Receiver', HttpStatus.CONFLICT);
+    }
     const conversation = await this.conversationsModel
       .findOneAndUpdate(
         {
