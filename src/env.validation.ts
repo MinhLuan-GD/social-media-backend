@@ -10,6 +10,7 @@ import {
 enum Environment {
   Development_Docker = 'docker.dev',
   Development_Local = 'local.dev',
+  Production = 'production',
 }
 
 class EnvironmentVariables {
