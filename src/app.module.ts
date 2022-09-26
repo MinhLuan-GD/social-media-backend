@@ -13,6 +13,7 @@ import { PostsModule } from '@posts/posts.module';
 import { ReactsModule } from '@reacts/reacts.module';
 import { UploadsModule } from '@uploads/uploads.module';
 import { ThrottlerModule } from '@nestjs/throttler';
+import { ChatModule } from './chat/chat.module';
 
 @Module({
   imports: [
@@ -26,6 +27,7 @@ import { ThrottlerModule } from '@nestjs/throttler';
     PostsModule,
     ReactsModule,
     UploadsModule,
+    ChatModule,
   ],
   controllers: [AppController],
   providers: [AppService],
