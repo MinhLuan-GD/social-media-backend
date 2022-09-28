@@ -7,10 +7,10 @@ export class Comment {
   @Prop()
   comment: string;
 
-  @Prop()
+  @Prop({ default: '' })
   image: string;
 
-  @Prop()
+  @Prop({ default: '' })
   parentId: string;
 
   @Prop({
