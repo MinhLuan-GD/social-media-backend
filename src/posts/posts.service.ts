@@ -29,7 +29,7 @@ export class PostsService {
     const promises = following.map((user) =>
       this.postsModel
         .find({ user: user })
-        .populate('user', 'first_name last_name picture username cover')
+        .populate('user', 'first_name last_name picture username cover gender')
         .populate('comments.commentBy', 'first_name last_name picture username')
         .sort({ createdAt: -1 })
         .limit(5),
@@ -38,7 +38,7 @@ export class PostsService {
     const followingPosts = (await Promise.all(promises)).flat();
     const userPosts = await this.postsModel
       .find({ user: id })
-      .populate('user', 'first_name last_name picture username cover')
+      .populate('user', 'first_name last_name picture username cover gender')
       .populate('comments.commentBy', 'first_name last_name picture username')
       .sort({ createdAt: -1 })
       .limit(5);
