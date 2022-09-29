@@ -3,6 +3,8 @@ import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Post, PostDocument } from './schemas/post.schema';
+import { CreateCommentDto } from './dto/comment.dto';
+import { CreatePostDto } from './dto/post.dto';
 
 @Injectable()
 export class PostsService {
@@ -12,8 +14,8 @@ export class PostsService {
   @InjectModel(User.name)
   private usersModel: Model<UserDocument>;
 
-  async createPost(input: any) {
-    return (await this.postsModel.create(input)).populate(
+  async createPost(createPostDto: CreatePostDto) {
+    return (await this.postsModel.create(createPostDto)).populate(
       'user',
       'first_name last_name cover picture username',
     );
@@ -49,7 +51,8 @@ export class PostsService {
     return followingPosts;
   }
 
-  async comment(id: string, comment: string, image: string, post: string) {
+  async comment(id: string, createCommentDto: CreateCommentDto) {
+    const { comment, image, postId: post, parentId } = createCommentDto;
     const { comments } = await this.postsModel
       .findByIdAndUpdate(
         post,
@@ -58,6 +61,7 @@ export class PostsService {
             comments: {
               image,
               comment,
+              parentId,
               commentAt: new Date(),
               commentBy: id,
             },

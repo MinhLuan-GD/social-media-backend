@@ -5,6 +5,8 @@ export class CreateCommentDto {
   @IsNotEmpty()
   postId: string;
 
+  parentId: string;
+
   comment: string;
 
   image: string;
