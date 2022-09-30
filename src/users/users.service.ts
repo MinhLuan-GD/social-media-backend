@@ -27,6 +27,13 @@ export class UsersService {
     return this.usersModel.findOne({ email }).lean();
   }
 
+  async findByEmailAndFollow(email: string): Promise<User & { _id: string }> {
+    return this.usersModel
+      .findOne({ email })
+      .populate('following', 'picture first_name last_name')
+      .lean();
+  }
+
   async findByUsername(username: string): Promise<User & { _id: string }> {
     return this.usersModel.findOne({ username }).lean();
   }

@@ -29,9 +29,19 @@ export class AuthController {
       last_name,
       username,
       picture,
+      following,
       verified,
     } = req.user;
-    return { id, first_name, last_name, username, picture, verified, token };
+    return {
+      id,
+      first_name,
+      last_name,
+      username,
+      picture,
+      following,
+      verified,
+      token,
+    };
   }
 
   @Post('signup')

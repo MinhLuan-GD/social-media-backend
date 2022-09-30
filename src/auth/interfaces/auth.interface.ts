@@ -17,4 +17,5 @@ export interface AuthUser {
   username: string;
   picture: string;
   verified: boolean;
+  following: User[];
 }
