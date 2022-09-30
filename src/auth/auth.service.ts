@@ -7,7 +7,7 @@ import { AuthUser } from './interfaces/auth.interface';
 @Injectable()
 export class AuthService extends AuthUtil {
   async validateUser(email: string, pass: string): Promise<any> {
-    const user = await this.usersService.findByEmail(email);
+    const user = await this.usersService.findByEmailAndFollow(email);
     if (user && compareSync(pass, user.password)) {
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { password, ...result } = user;
@@ -29,7 +29,7 @@ export class AuthService extends AuthUtil {
   }
 
   async signup(input: CreateSignupDto): Promise<AuthUser & { token: string }> {
-    const findUser = await this.usersService.findByEmail(input.email);
+    const findUser = await this.usersService.findByEmailAndFollow(input.email);
     if (findUser) throw new HttpException('conflict', HttpStatus.CONFLICT);
     const password = await hash(input.password, 10);
     const username = await this.gUsername(input.first_name + input.last_name);
@@ -49,6 +49,7 @@ export class AuthService extends AuthUtil {
       last_name: user.last_name,
       username: user.username,
       picture: user.picture,
+      following: user.following,
       verified: user.verified,
     };
     return { ...rs, token };

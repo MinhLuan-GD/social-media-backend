@@ -29,6 +29,12 @@ services:
       - db
       - store
 
+  ws:
+    container_name: ws
+    image: smb-ws
+    ports:
+      - 8900:8900
+
 volumes:
   db: {}
   store: {}

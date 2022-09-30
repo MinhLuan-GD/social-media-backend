@@ -10,6 +10,8 @@ import {
   Param,
   Delete,
 } from '@nestjs/common';
+import { CreateCommentDto } from './dto/comment.dto';
+import { CreatePostDto } from './dto/post.dto';
 import { PostsService } from './posts.service';
 
 @Controller('posts')
@@ -18,8 +20,8 @@ export class PostsController {
 
   @UseGuards(JwtAuthGuard)
   @Put('create-post')
-  async createPost(@Body() input: any) {
-    return this.postsService.createPost(input);
+  async createPost(@Body() createPostDto: CreatePostDto) {
+    return this.postsService.createPost(createPostDto);
   }
 
   @UseGuards(JwtAuthGuard)
@@ -32,16 +34,14 @@ export class PostsController {
   @Put('comment')
   async comment(
     @Request() req: RequestWithUser,
-    @Body() body: { comment: string; image: string; postId: string },
+    @Body() createCommentDto: CreateCommentDto,
   ) {
-    const { comment, image, postId } = body;
-    return this.postsService.comment(req.user._id, comment, image, postId);
+    return this.postsService.comment(req.user._id, createCommentDto);
   }
 
   @UseGuards(JwtAuthGuard)
   @Put('save-post/:id')
   async savePost(@Request() req: RequestWithUser, @Param('id') id: string) {
-    console.log(`save-post:::id:::${id}`);
     return this.postsService.savePost(req.user._id, id);
   }
 
