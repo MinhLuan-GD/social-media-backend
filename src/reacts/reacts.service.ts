@@ -16,8 +16,9 @@ export class ReactsService {
     const check = await this.reactsModel.findOne({ user, post });
     if (!check) this.reactsModel.create({ user, post, react });
     else if (check.react == react)
-      this.reactsModel.findByIdAndRemove(check._id);
-    else this.reactsModel.findByIdAndUpdate(check._id, { $set: { react } });
+      await this.reactsModel.findByIdAndRemove(check._id);
+    else
+      await this.reactsModel.findByIdAndUpdate(check._id, { $set: { react } });
     return 'ok';
   }
 
