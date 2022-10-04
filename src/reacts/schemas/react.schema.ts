@@ -14,10 +14,10 @@ export class React {
   react: string;
 
   @Prop({ type: mongoose.Schema.Types.ObjectId, ref: Post.name })
-  post: Post;
+  postRef: Post;
 
   @Prop({ type: mongoose.Schema.Types.ObjectId, ref: User.name })
-  user: User;
+  reactBy: User;
 }
 
 export const ReactSchema = SchemaFactory.createForClass(React);

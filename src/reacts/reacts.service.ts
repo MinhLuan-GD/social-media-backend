@@ -12,9 +12,9 @@ export class ReactsService {
   @InjectModel(User.name)
   private usersModel: Model<UserDocument>;
 
-  async reactPost(user: string, post: string, react: string) {
-    const check = await this.reactsModel.findOne({ user, post });
-    if (!check) this.reactsModel.create({ user, post, react });
+  async reactPost(reactBy: string, postRef: string, react: string) {
+    const check = await this.reactsModel.findOne({ reactBy, postRef });
+    if (!check) this.reactsModel.create({ reactBy, postRef, react });
     else if (check.react == react)
       await this.reactsModel.findByIdAndRemove(check._id);
     else
@@ -22,8 +22,8 @@ export class ReactsService {
     return 'ok';
   }
 
-  async getReacts(user: string, post: string) {
-    const reactsArray = await this.reactsModel.find({ post });
+  async getReacts(reactBy: string, postRef: string) {
+    const reactsArray = await this.reactsModel.find({ postRef });
 
     const newReacts = reactsArray.reduce((group, react) => {
       const key = react.react;
@@ -40,10 +40,10 @@ export class ReactsService {
       };
     });
 
-    const check = await this.reactsModel.findOne({ post, user });
+    const check = await this.reactsModel.findOne({ postRef, reactBy });
     const checkSaved = await this.usersModel.findOne({
-      _id: user,
-      savedPosts: [{ post }],
+      _id: reactBy,
+      savedPosts: [{ postRef }],
     });
     const rs = {
       reacts,
