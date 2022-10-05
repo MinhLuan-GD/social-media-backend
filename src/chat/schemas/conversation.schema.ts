@@ -17,6 +17,9 @@ export class Conversation {
   })
   members: User[];
 
+  @Prop({ default: '' })
+  userNotSeen: string;
+
   @Prop({ type: [MessageSchema], default: [] })
   messages: Message[];
 }

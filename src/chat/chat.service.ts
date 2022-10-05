@@ -72,6 +72,9 @@ export class ChatService {
           $setOnInsert: {
             members: [sender, user],
           },
+          $set: {
+            userNotSeen: user,
+          },
           $push: {
             messages: { sender, text },
           },
@@ -85,5 +88,14 @@ export class ChatService {
       .select('-messages.updatedAt')
       .lean();
     return conversation;
+  }
+
+  async userSeen(id: string) {
+    this.conversationsModel.findByIdAndUpdate(
+      id,
+      { userNotSeen: '' },
+      {},
+      () => ({}),
+    );
   }
 }
