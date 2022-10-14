@@ -40,6 +40,21 @@ export class PostsController {
   }
 
   @UseGuards(JwtAuthGuard)
+  @Put('update-comment')
+  async updateComment(
+    @Request() req: RequestWithUser,
+    @Body() createCommentDto: CreateCommentDto,
+  ) {
+    return this.postsService.updateComment(req.user._id, createCommentDto);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Put('delete-comment')
+  async deleteComment(@Request() req: RequestWithUser, @Body() body: any) {
+    return this.postsService.deleteComment(req.user._id, body.id, body.post);
+  }
+
+  @UseGuards(JwtAuthGuard)
   @Put('save-post/:id')
   async savePost(@Request() req: RequestWithUser, @Param('id') id: string) {
     return this.postsService.savePost(req.user._id, id);

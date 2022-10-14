@@ -22,6 +22,9 @@ export class Comment {
 
   @Prop({ required: true })
   commentAt: Date;
+
+  @Prop()
+  updateAt: Date;
 }
 
 export const CommentSchema = SchemaFactory.createForClass(Comment);
