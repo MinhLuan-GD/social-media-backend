@@ -5,6 +5,7 @@ import { Model } from 'mongoose';
 import { Post, PostDocument } from './schemas/post.schema';
 import { CreateCommentDto } from './dto/comment.dto';
 import { CreatePostDto } from './dto/post.dto';
+import { Comment } from './schemas/comment.schema';
 
 @Injectable()
 export class PostsService {
@@ -67,9 +68,7 @@ export class PostsService {
             },
           },
         },
-        {
-          new: true,
-        },
+        { new: true },
       )
       .populate('comments.commentBy', 'picture first_name last_name username')
       .lean();
@@ -95,9 +94,7 @@ export class PostsService {
             'comments.$.updateAt': new Date(),
           },
         },
-        {
-          new: true,
-        },
+        { new: true },
       )
       .populate('comments.commentBy', 'picture first_name last_name username')
       .lean();
@@ -112,14 +109,20 @@ export class PostsService {
       throw new HttpException('cant find comment', HttpStatus.CONFLICT);
     }
 
-    this.postsModel.findOneAndUpdate(
-      { _id: post },
-      { $pull: { comments: { _id: _id } } },
-      {},
-      () => ({}),
-    );
+    const commentIds = findPost.comments
+      .filter((x) => x.parentId == _id)
+      .map((x: Comment & { _id: any }) => x._id);
 
-    return 'ok';
+    const { comments } = await this.postsModel
+      .findOneAndUpdate(
+        { _id: post },
+        { $pull: { comments: { _id: [...commentIds, _id] } } },
+        { new: true },
+      )
+      .populate('comments.commentBy', 'picture first_name last_name username')
+      .lean();
+
+    return comments;
   }
 
   async savePost(id: string, post: string) {
