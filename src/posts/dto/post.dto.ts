@@ -11,8 +11,6 @@ export class CreatePostDto {
 
   text: string;
 
-  @ValidateNested({ each: true })
-  @Type(() => CreateImageDto)
   images: CreateImageDto[];
 
   @IsString()
