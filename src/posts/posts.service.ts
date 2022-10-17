@@ -154,6 +154,6 @@ export class PostsService {
 
   async deletePost(id: string) {
     this.postsModel.findByIdAndRemove(id, () => ({}));
-    return 'ok';
+    return { status: 'ok' };
   }
 }
