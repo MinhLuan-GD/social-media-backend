@@ -109,14 +109,24 @@ export class PostsService {
       throw new HttpException('cant find comment', HttpStatus.CONFLICT);
     }
 
-    const commentIds = findPost.comments
-      .filter((x) => x.parentId == _id)
-      .map((x: Comment & { _id: any }) => x._id);
+    const commentIds = [];
+    findPost.comments.forEach((x: Comment & { _id: any }) => {
+      if (x.parentId == _id) {
+        findPost.comments.forEach((y: Comment & { _id: any }) => {
+          if (y.parentId == x.parentId) {
+            commentIds.push(y._id);
+          }
+          commentIds.push(x._id);
+        });
+      }
+    });
+
+    commentIds.push(_id);
 
     const { comments } = await this.postsModel
       .findOneAndUpdate(
         { _id: post },
-        { $pull: { comments: { _id: [...commentIds, _id] } } },
+        { $pull: { comments: { _id: commentIds } } },
         { new: true },
       )
       .populate('comments.commentBy', 'picture first_name last_name username')
