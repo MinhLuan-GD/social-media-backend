@@ -1,5 +1,4 @@
-import { Type } from 'class-transformer';
-import { IsNotEmpty, IsString, ValidateNested } from 'class-validator';
+import { IsNotEmpty, IsString } from 'class-validator';
 
 class CreateImageDto {
   @IsString()
@@ -11,8 +10,6 @@ export class CreatePostDto {
 
   text: string;
 
-  @ValidateNested({ each: true })
-  @Type(() => CreateImageDto)
   images: CreateImageDto[];
 
   @IsString()

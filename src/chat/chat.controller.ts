@@ -1,6 +1,13 @@
 import { RequestWithUser } from '@auth/interfaces/auth.interface';
 import { JwtAuthGuard } from '@auth/jwt-auth.guard';
-import { Controller, Put, UseGuards, Request, Body } from '@nestjs/common';
+import {
+  Controller,
+  Put,
+  UseGuards,
+  Request,
+  Body,
+  Param,
+} from '@nestjs/common';
 import { ChatService } from './chat.service';
 import { CreateMessageDto } from './dto/message.dto';
 
@@ -22,5 +29,11 @@ export class ChatController {
   ) {
     const { user, text } = body;
     return this.chatService.addMessage(req.user._id, user, text);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Put('user-seen/:id')
+  async userSeen(@Param('id') id: string) {
+    return this.chatService.userSeen(id);
   }
 }

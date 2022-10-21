@@ -1,10 +1,11 @@
 import { User, UserDocument } from '@users/schemas/user.schema';
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Post, PostDocument } from './schemas/post.schema';
 import { CreateCommentDto } from './dto/comment.dto';
 import { CreatePostDto } from './dto/post.dto';
+import { Comment } from './schemas/comment.schema';
 
 @Injectable()
 export class PostsService {
@@ -67,12 +68,70 @@ export class PostsService {
             },
           },
         },
-        {
-          new: true,
-        },
+        { new: true },
       )
       .populate('comments.commentBy', 'picture first_name last_name username')
       .lean();
+    return comments;
+  }
+
+  async updateComment(commentBy: string, createCommentDto: CreateCommentDto) {
+    const { comment, image, postId: post, id: _id } = createCommentDto;
+    const findPost = await this.postsModel
+      .findOne({ _id: post, comments: { $elemMatch: { _id, commentBy } } })
+      .lean();
+    if (!findPost) {
+      throw new HttpException('cant find comment', HttpStatus.CONFLICT);
+    }
+
+    const { comments } = await this.postsModel
+      .findOneAndUpdate(
+        { _id: post, comments: { $elemMatch: { _id, commentBy } } },
+        {
+          $set: {
+            'comments.$.comment': comment,
+            'comments.$.image': image,
+            'comments.$.updateAt': new Date(),
+          },
+        },
+        { new: true },
+      )
+      .populate('comments.commentBy', 'picture first_name last_name username')
+      .lean();
+    return comments;
+  }
+
+  async deleteComment(commentBy: string, _id: string, post: string) {
+    const findPost = await this.postsModel
+      .findOne({ _id: post, comments: { $elemMatch: { _id, commentBy } } })
+      .lean();
+    if (!findPost) {
+      throw new HttpException('cant find comment', HttpStatus.CONFLICT);
+    }
+
+    const commentIds = [];
+    findPost.comments.forEach((x: Comment & { _id: any }) => {
+      if (x.parentId == _id) {
+        findPost.comments.forEach((y: Comment & { _id: any }) => {
+          if (y.parentId == x.parentId) {
+            commentIds.push(y._id);
+          }
+          commentIds.push(x._id);
+        });
+      }
+    });
+
+    commentIds.push(_id);
+
+    const { comments } = await this.postsModel
+      .findOneAndUpdate(
+        { _id: post },
+        { $pull: { comments: { _id: commentIds } } },
+        { new: true },
+      )
+      .populate('comments.commentBy', 'picture first_name last_name username')
+      .lean();
+
     return comments;
   }
 
@@ -104,7 +163,7 @@ export class PostsService {
   }
 
   async deletePost(id: string) {
-    this.postsModel.findByIdAndRemove(id);
-    return 'ok';
+    this.postsModel.findByIdAndRemove(id, () => ({}));
+    return { status: 'ok' };
   }
 }
