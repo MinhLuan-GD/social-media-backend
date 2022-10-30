@@ -54,7 +54,7 @@ export class ChatService {
     return conversations;
   }
 
-  async addMessage(sender: string, user: string, text: string) {
+  async addMessage(sender: string, user: string, text: string, image: string) {
     if (sender == user) {
       throw new HttpException('Sender is Receiver', HttpStatus.CONFLICT);
     }
@@ -72,11 +72,8 @@ export class ChatService {
           $setOnInsert: {
             members: [sender, user],
           },
-          $set: {
-            userNotSeen: user,
-          },
           $push: {
-            messages: { sender, text },
+            messages: { sender, text, image },
           },
         },
         {
@@ -90,11 +87,47 @@ export class ChatService {
     return conversation;
   }
 
-  async userSeen(id: string) {
-    this.conversationsModel.findByIdAndUpdate(
-      id,
-      { userNotSeen: '' },
-      {},
+  // async userSeen(id: string) {
+  //   this.conversationsModel.findByIdAndUpdate(
+  //     id,
+  //     { userNotSeen: '' },
+  //     {},
+  //     () => ({}),
+  //   );
+  // }
+
+  async messageSeen(conversationId: string, messageId: string) {
+    this.conversationsModel.findOneAndUpdate(
+      {
+        _id: conversationId,
+        members: {
+          _id: messageId,
+        },
+      },
+      {
+        $set: {
+          'members.$.status': 'seen',
+        },
+      },
+      { new: true },
+      () => ({}),
+    );
+  }
+
+  async deliveredMessage(conversationId: string, messageId: string) {
+    this.conversationsModel.findOneAndUpdate(
+      {
+        _id: conversationId,
+        members: {
+          _id: messageId,
+        },
+      },
+      {
+        $set: {
+          'members.$.status': 'delivered',
+        },
+      },
+      { new: true },
       () => ({}),
     );
   }

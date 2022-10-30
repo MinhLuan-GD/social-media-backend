@@ -6,11 +6,13 @@ import {
   UseGuards,
   Request,
   Body,
-  Param,
+  Patch,
 } from '@nestjs/common';
+import { SkipThrottle } from '@nestjs/throttler';
 import { ChatService } from './chat.service';
 import { CreateMessageDto } from './dto/message.dto';
 
+@SkipThrottle()
 @Controller('chat')
 export class ChatController {
   constructor(private chatService: ChatService) {}
@@ -23,17 +25,25 @@ export class ChatController {
 
   @UseGuards(JwtAuthGuard)
   @Put('message')
-  async getFriend(
+  async addMessage(
     @Request() req: RequestWithUser,
     @Body() body: CreateMessageDto,
   ) {
-    const { user, text } = body;
-    return this.chatService.addMessage(req.user._id, user, text);
+    const { user, text, image } = body;
+    return this.chatService.addMessage(req.user._id, user, text, image);
   }
 
   @UseGuards(JwtAuthGuard)
-  @Put('user-seen/:id')
-  async userSeen(@Param('id') id: string) {
-    return this.chatService.userSeen(id);
+  @Patch('seen-message')
+  async userSeen(@Body() body: any) {
+    const { conversationId, messageId } = body;
+    return this.chatService.messageSeen(conversationId, messageId);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Patch('delivered-message')
+  async deliveredMessage(@Body() body: any) {
+    const { conversationId, messageId } = body;
+    return this.chatService.deliveredMessage(conversationId, messageId);
   }
 }

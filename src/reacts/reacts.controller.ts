@@ -9,8 +9,10 @@ import {
   Get,
   Param,
 } from '@nestjs/common';
+import { SkipThrottle } from '@nestjs/throttler';
 import { ReactsService } from './reacts.service';
 
+@SkipThrottle()
 @Controller('reacts')
 export class ReactsController {
   constructor(private reactsService: ReactsService) {}

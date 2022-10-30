@@ -11,8 +11,10 @@ import {
   Put,
   Post,
 } from '@nestjs/common';
+import { SkipThrottle } from '@nestjs/throttler';
 import { UsersService } from './users.service';
 
+@SkipThrottle()
 @Controller('users')
 export class UsersController {
   constructor(private usersService: UsersService) {}

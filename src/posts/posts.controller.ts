@@ -10,10 +10,12 @@ import {
   Param,
   Delete,
 } from '@nestjs/common';
+import { SkipThrottle } from '@nestjs/throttler';
 import { CreateCommentDto } from './dto/comment.dto';
 import { CreatePostDto } from './dto/post.dto';
 import { PostsService } from './posts.service';
 
+@SkipThrottle()
 @Controller('posts')
 export class PostsController {
   constructor(private postsService: PostsService) {}
