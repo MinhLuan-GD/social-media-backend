@@ -37,14 +37,14 @@ export class PostsService {
     );
 
     const followingPosts = (await Promise.all(promises)).flat();
-    const userPosts = await this.postsModel
-      .find({ user: id })
-      .populate('user', 'first_name last_name picture username cover gender')
-      .populate('comments.commentBy', 'first_name last_name picture username')
-      .sort({ createdAt: -1 })
-      .limit(5);
+    // const userPosts = await this.postsModel
+    //   .find({ user: id })
+    //   .populate('user', 'first_name last_name picture username cover gender')
+    //   .populate('comments.commentBy', 'first_name last_name picture username')
+    //   .sort({ createdAt: -1 })
+    //   .limit(5);
 
-    followingPosts.push(...[...userPosts]);
+    // followingPosts.push(...[...userPosts]);
     followingPosts.sort((a, b) => {
       return b.createdAt.getTime() - a.createdAt.getTime();
     });
