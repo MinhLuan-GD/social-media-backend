@@ -270,7 +270,7 @@ export class UsersService {
     const users = await this.usersModel
       .find({ $text: { $search: searchTerm } })
       .select('first_name last_name username picture')
-      .limit(5)
+      .limit(15)
       .lean();
 
     return users;
