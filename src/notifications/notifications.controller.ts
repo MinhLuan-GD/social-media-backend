@@ -5,13 +5,18 @@ import {
   Controller,
   Get,
   Inject,
+  Param,
+  Patch,
+  Post,
   Request,
   UseGuards,
 } from '@nestjs/common';
 import { INotificationService } from './notifications';
 import { JwtAuthGuard } from '@/auth/jwt-auth.guard';
 import { CreateNotificationDto } from './dtos/CreateNotification.dto';
+import { SkipThrottle } from '@nestjs/throttler';
 
+@SkipThrottle()
 @Controller(Routes.NOTIFICATIONS)
 export class NotificationsController {
   constructor(
@@ -26,7 +31,7 @@ export class NotificationsController {
   }
 
   @UseGuards(JwtAuthGuard)
-  @Get()
+  @Post()
   async createNotification(
     @Request() req: RequestWithUser,
     @Body() createNotificationDto: CreateNotificationDto,
@@ -35,5 +40,17 @@ export class NotificationsController {
       req.user._id,
       createNotificationDto,
     );
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Patch(':id/delivered')
+  async notificationDelivered(@Param('id') notificationId: string) {
+    return this.notificationsService.notificationDelivered(notificationId);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Patch(':id/seen')
+  async notificationSeen(@Param('id') notificationId: string) {
+    return this.notificationsService.notificationSeen(notificationId);
   }
 }

@@ -15,22 +15,43 @@ export class NotificationsService implements INotificationService {
     private readonly notificationsModel: Model<NotificationDocument>,
   ) {}
 
-  getNotifications(user: string) {
-    return this.notificationsModel.find({ user }).limit(15).lean();
+  async getNotifications(user: string) {
+    return this.notificationsModel
+      .find({ user })
+      .limit(10)
+      .sort({ createdAt: -1 })
+      .select('-user -__v -updatedAt')
+      .lean();
   }
 
-  createNotification(
+  async createNotification(
     user: string,
     notificationDetails: CreateNotificationDetails,
   ) {
     return this.notificationsModel.create({ ...notificationDetails, user });
   }
 
-  notificationDelivered(notificationId: string) {
-    throw new Error('Method not implemented.');
+  async notificationDelivered(notificationId: string) {
+    this.notificationsModel.findByIdAndUpdate(
+      notificationId,
+      {
+        $set: { status: 'delivered' },
+      },
+      {},
+      () => ({}),
+    );
+    return 'ok';
   }
 
-  notificationSeen(notificationId: string) {
-    throw new Error('Method not implemented.');
+  async notificationSeen(notificationId: string) {
+    this.notificationsModel.findByIdAndUpdate(
+      notificationId,
+      {
+        $set: { status: 'seen' },
+      },
+      {},
+      () => ({}),
+    );
+    return 'ok';
   }
 }
