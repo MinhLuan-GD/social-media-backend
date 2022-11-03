@@ -96,35 +96,35 @@ export class ChatService {
     this.conversationsModel.findOneAndUpdate(
       {
         _id: conversationId,
-        members: {
-          _id: messageId,
-        },
+        'messages._id': messageId,
       },
       {
         $set: {
-          'members.$.status': 'seen',
+          'messages.$.status': 'seen',
         },
       },
       { new: true },
       () => ({}),
     );
+
+    return 'ok';
   }
 
   async deliveredMessage(conversationId: string, messageId: string) {
     this.conversationsModel.findOneAndUpdate(
       {
         _id: conversationId,
-        members: {
-          _id: messageId,
-        },
+        'messages._id': messageId,
       },
       {
         $set: {
-          'members.$.status': 'delivered',
+          'messages.$.status': 'delivered',
         },
       },
       { new: true },
       () => ({}),
     );
+
+    return 'ok';
   }
 }
