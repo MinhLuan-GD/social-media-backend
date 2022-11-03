@@ -54,8 +54,13 @@ export class ChatService {
     return conversations;
   }
 
-  async addMessage(sender: string, user: string, text: string, image: string) {
-    if (sender == user) {
+  async addMessage(
+    sender: string,
+    receiver: string,
+    text: string,
+    image: string,
+  ) {
+    if (sender == receiver) {
       throw new HttpException('Sender is Receiver', HttpStatus.CONFLICT);
     }
     const conversation = await this.conversationsModel
@@ -64,16 +69,16 @@ export class ChatService {
           members: {
             $all: [
               { $elemMatch: { $eq: new Types.ObjectId(sender) } },
-              { $elemMatch: { $eq: new Types.ObjectId(user) } },
+              { $elemMatch: { $eq: new Types.ObjectId(receiver) } },
             ],
           },
         },
         {
           $setOnInsert: {
-            members: [sender, user],
+            members: [sender, receiver],
           },
           $push: {
-            messages: { sender, text, image },
+            messages: { sender, receiver, text, image },
           },
         },
         {
@@ -86,15 +91,6 @@ export class ChatService {
       .lean();
     return conversation;
   }
-
-  // async userSeen(id: string) {
-  //   this.conversationsModel.findByIdAndUpdate(
-  //     id,
-  //     { userNotSeen: '' },
-  //     {},
-  //     () => ({}),
-  //   );
-  // }
 
   async messageSeen(conversationId: string, messageId: string) {
     this.conversationsModel.findOneAndUpdate(

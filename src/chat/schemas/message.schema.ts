@@ -5,6 +5,9 @@ export class Message {
   @Prop({ required: true })
   sender: string;
 
+  @Prop({ required: true })
+  receiver: string;
+
   @Prop({ default: '' })
   text: string;
 
