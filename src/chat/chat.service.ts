@@ -129,19 +129,20 @@ export class ChatService {
   }
 
   async messageSeenAll(conversationId: string) {
-    this.conversationsModel.findOneAndUpdate(
-      {
-        _id: conversationId,
-      },
-      {
-        $set: {
-          'messages.$[].status': 'seen',
+    const { messages } = await this.conversationsModel
+      .findOneAndUpdate(
+        {
+          _id: conversationId,
         },
-      },
-      { new: true },
-      () => ({}),
-    );
+        {
+          $set: {
+            'messages.$[].status': 'seen',
+          },
+        },
+        { new: true },
+      )
+      .lean();
 
-    return 'ok';
+    return messages;
   }
 }
