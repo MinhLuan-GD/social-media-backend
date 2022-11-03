@@ -127,4 +127,21 @@ export class ChatService {
 
     return 'ok';
   }
+
+  async messageSeenAll(conversationId: string) {
+    this.conversationsModel.findOneAndUpdate(
+      {
+        _id: conversationId,
+      },
+      {
+        $set: {
+          'messages.$[].status': 'seen',
+        },
+      },
+      { new: true },
+      () => ({}),
+    );
+
+    return 'ok';
+  }
 }
