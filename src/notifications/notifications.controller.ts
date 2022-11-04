@@ -33,13 +33,9 @@ export class NotificationsController {
   @UseGuards(JwtAuthGuard)
   @Post()
   async createNotification(
-    @Request() req: RequestWithUser,
     @Body() createNotificationDto: CreateNotificationDto,
   ) {
-    return this.notificationsService.createNotification(
-      req.user._id,
-      createNotificationDto,
-    );
+    return this.notificationsService.createNotification(createNotificationDto);
   }
 
   @UseGuards(JwtAuthGuard)

@@ -7,6 +7,10 @@ export class CreateNotificationDto {
 
   @IsNotEmpty({ message: 'This field is not empty!' })
   @IsString()
+  user: string;
+
+  @IsNotEmpty({ message: 'This field is not empty!' })
+  @IsString()
   icon: string;
 
   @IsNotEmpty({ message: 'This field is not empty!' })

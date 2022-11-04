@@ -29,6 +29,9 @@ export class Notification {
 
   @Prop({ default: 'unseen', enum: ['delivered', 'unseen', 'seen'] })
   status: string;
+
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 export const NotificationSchema = SchemaFactory.createForClass(Notification);

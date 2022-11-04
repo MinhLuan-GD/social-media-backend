@@ -20,15 +20,19 @@ export class NotificationsService implements INotificationService {
       .find({ user })
       .limit(10)
       .sort({ createdAt: -1 })
-      .select('-user -__v -updatedAt')
+      .select('-__v -updatedAt')
+      .populate('from', 'first_name last_name username')
       .lean();
   }
 
-  async createNotification(
-    user: string,
-    notificationDetails: CreateNotificationDetails,
-  ) {
-    return this.notificationsModel.create({ ...notificationDetails, user });
+  async createNotification(notificationDetails: CreateNotificationDetails) {
+    const { _id } = await this.notificationsModel.create(notificationDetails);
+
+    return this.notificationsModel
+      .findById(_id)
+      .select('-__v -updatedAt')
+      .populate('from', 'first_name last_name username')
+      .lean();
   }
 
   async notificationDelivered(notificationId: string) {
