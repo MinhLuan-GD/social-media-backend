@@ -27,7 +27,7 @@ export class Notification {
   @Prop({ required: true })
   text: string;
 
-  @Prop({ default: 'unseen', enum: ['delivered', 'unseen', 'seen'] })
+  @Prop({ default: 'unseen', enum: ['unseen', 'seen'] })
   status: string;
 
   createdAt: Date;

@@ -21,7 +21,7 @@ export class NotificationsService implements INotificationService {
       .limit(10)
       .sort({ createdAt: -1 })
       .select('-__v -updatedAt')
-      .populate('from', 'first_name last_name username')
+      .populate('from', 'first_name last_name picture username')
       .lean();
   }
 
@@ -31,31 +31,21 @@ export class NotificationsService implements INotificationService {
     return this.notificationsModel
       .findById(_id)
       .select('-__v -updatedAt')
-      .populate('from', 'first_name last_name username')
+      .populate('from', 'first_name last_name picture username')
       .lean();
   }
 
-  async notificationDelivered(notificationId: string) {
-    this.notificationsModel.findByIdAndUpdate(
-      notificationId,
-      {
-        $set: { status: 'delivered' },
-      },
-      {},
-      () => ({}),
-    );
-    return 'ok';
-  }
-
   async notificationSeen(notificationId: string) {
-    this.notificationsModel.findByIdAndUpdate(
-      notificationId,
-      {
-        $set: { status: 'seen' },
-      },
-      {},
-      () => ({}),
-    );
-    return 'ok';
+    return this.notificationsModel
+      .findByIdAndUpdate(
+        notificationId,
+        {
+          $set: { status: 'seen' },
+        },
+        { new: true },
+      )
+      .select('-__v -updatedAt')
+      .populate('from', 'first_name last_name picture username')
+      .lean();
   }
 }
