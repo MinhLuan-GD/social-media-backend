@@ -136,10 +136,13 @@ export class ChatService {
         },
         {
           $set: {
-            'messages.$[].status': 'seen',
+            'messages.$[e].status': 'seen',
           },
         },
-        { new: true },
+        {
+          new: true,
+          arrayFilters: [{ 'e.status': { $in: ['unseen', 'delivered'] } }],
+        },
       )
       .lean();
 
