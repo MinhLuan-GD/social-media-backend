@@ -46,4 +46,11 @@ export class ChatController {
     const { conversationId, messageId } = body;
     return this.chatService.deliveredMessage(conversationId, messageId);
   }
+
+  @UseGuards(JwtAuthGuard)
+  @Patch('seen-all-message')
+  async userAllSeen(@Body() body: any) {
+    const { conversationId } = body;
+    return this.chatService.messageSeenAll(conversationId);
+  }
 }
