@@ -128,7 +128,7 @@ export class ChatService {
     return 'ok';
   }
 
-  async messageSeenAll(conversationId: string) {
+  async seenAll(conversationId: string) {
     const { messages } = await this.conversationsModel
       .findOneAndUpdate(
         {
@@ -140,6 +140,24 @@ export class ChatService {
           },
         },
         { new: true },
+      )
+      .lean();
+
+    return messages;
+  }
+
+  async deliveredAll(conversationId: string) {
+    const { messages } = await this.conversationsModel
+      .findOneAndUpdate(
+        {
+          _id: conversationId,
+        },
+        {
+          $set: {
+            'messages.$[e].status': 'delivered',
+          },
+        },
+        { new: true, arrayFilters: [{ 'e.status': 'unseen' }] },
       )
       .lean();
 
