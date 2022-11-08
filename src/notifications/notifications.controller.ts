@@ -40,7 +40,13 @@ export class NotificationsController {
 
   @UseGuards(JwtAuthGuard)
   @Patch(':id/seen')
-  async notificationSeen(@Param('id') notificationId: string) {
-    return this.notificationsService.notificationSeen(notificationId);
+  async notificationSeen(
+    @Param('id') notificationId: string,
+    @Request() req: RequestWithUser,
+  ) {
+    return this.notificationsService.notificationSeen(
+      notificationId,
+      req.user._id,
+    );
   }
 }

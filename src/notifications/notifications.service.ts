@@ -35,17 +35,11 @@ export class NotificationsService implements INotificationService {
       .lean();
   }
 
-  async notificationSeen(notificationId: string) {
-    return this.notificationsModel
-      .findByIdAndUpdate(
-        notificationId,
-        {
-          $set: { status: 'seen' },
-        },
-        { new: true },
-      )
-      .select('-__v -updatedAt')
-      .populate('from', 'first_name last_name picture username')
-      .lean();
+  async notificationSeen(notificationId: string, user: string) {
+    await this.notificationsModel.findByIdAndUpdate(notificationId, {
+      $set: { status: 'seen' },
+    });
+
+    return this.getNotifications(user);
   }
 }
