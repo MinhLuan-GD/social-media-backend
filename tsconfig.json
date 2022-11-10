@@ -18,17 +18,7 @@
     "forceConsistentCasingInFileNames": false,
     "noFallthroughCasesInSwitch": false,
     "paths": {
-      "@/*": ["*"],
-      "@auth/*": ["auth/*"],
-      "@cache": ["cache"],
-      "@config/*": ["config/*"],
-      "@databases": ["databases"],
-      "@exceptions/*": ["exceptions/*"],
-      "@logger/*": ["logger/*"],
-      "@posts/*": ["posts/*"],
-      "@reacts/*": ["reacts/*"],
-      "@uploads/*": ["uploads/*"],
-      "@users/*": ["users/*"]
+      "@/*": ["*"]
     }
   },
   "include": ["src/**/*.ts", "src/**/*.json", ".env"],
