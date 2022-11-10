@@ -1,7 +1,15 @@
-import { Controller, Post, UseGuards, Request, Body } from '@nestjs/common';
+import { Routes, Services } from '@/utils/constants';
+import {
+  Controller,
+  Post,
+  UseGuards,
+  Request,
+  Body,
+  Inject,
+} from '@nestjs/common';
 import { SkipThrottle } from '@nestjs/throttler';
-import { AuthService } from './auth.service';
-import { CreateSignupDto } from './dto/signup.dto';
+import { IAuthService } from './auth';
+import { CreateUserDto } from './dtos/CreateUser.dto';
 import {
   RequestWithUser,
   AuthPayload,
@@ -11,9 +19,9 @@ import { JwtAuthGuard } from './jwt-auth.guard';
 import { LocalAuthGuard } from './local-auth.guard';
 
 @SkipThrottle()
-@Controller('auth')
+@Controller(Routes.AUTH)
 export class AuthController {
-  constructor(private authService: AuthService) {}
+  constructor(@Inject(Services.AUTH) private authService: IAuthService) {}
 
   @SkipThrottle(false)
   @UseGuards(LocalAuthGuard)
@@ -46,7 +54,7 @@ export class AuthController {
 
   @Post('signup')
   async signup(
-    @Body() input: CreateSignupDto,
+    @Body() input: CreateUserDto,
   ): Promise<AuthUser & { token: string }> {
     return this.authService.signup(input);
   }

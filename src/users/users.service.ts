@@ -1,4 +1,4 @@
-import { Post, PostDocument } from '@posts/schemas/post.schema';
+import { Post, PostDocument } from '@/posts/schemas/post.schema';
 import {
   CACHE_MANAGER,
   HttpException,
@@ -11,55 +11,58 @@ import { Model } from 'mongoose';
 import { UpdateOptions } from './interfaces/opts.interface';
 import { User, UserDocument } from './schemas/user.schema';
 import { Cache } from 'cache-manager';
+import {
+  CreateUserDetails,
+  FindUserParams,
+  ModifyUserData,
+  ModifyUserFilter,
+} from '@/utils/types';
+import { IUsersService } from './users';
 
 @Injectable()
-export class UsersService {
-  @InjectModel(User.name)
-  private usersModel: Model<UserDocument>;
+export class UsersService implements IUsersService {
+  constructor(
+    @InjectModel(User.name)
+    private usersModel: Model<UserDocument>,
+    @InjectModel(Post.name)
+    private postsModel: Model<PostDocument>,
+    @Inject(CACHE_MANAGER)
+    private cacheManager: Cache,
+  ) {}
 
-  @InjectModel(Post.name)
-  private postsModel: Model<PostDocument>;
-
-  @Inject(CACHE_MANAGER)
-  private cacheManager: Cache;
-
-  async findByEmail(email: string): Promise<User & { _id: string }> {
-    return this.usersModel.findOne({ email }).lean();
+  async findUser(param: FindUserParams) {
+    return this.usersModel.findOne(param).lean();
   }
 
-  async findByEmailAndFollow(email: string): Promise<User & { _id: string }> {
+  async findUserAndFollow(email: string) {
     return this.usersModel
       .findOne({ email })
       .populate('following', 'picture first_name last_name')
       .lean();
   }
 
-  async findByUsername(username: string): Promise<User & { _id: string }> {
-    return this.usersModel.findOne({ username }).lean();
-  }
-
-  async findById(id: string): Promise<User> {
-    return this.usersModel.findById(id).lean();
-  }
-
-  async createUser(input: any): Promise<User & { _id: string }> {
+  async createUser(input: CreateUserDetails) {
     const user = await this.usersModel.create(input);
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { password, ...result }: User & { _id: string } = user.toJSON();
     return result;
   }
 
-  async updateUser(filter: any, data: any, options: UpdateOptions = {}) {
-    const user = await this.usersModel.findOneAndUpdate(filter, data, options);
-    return user;
+  async updateUser(
+    filter: ModifyUserFilter,
+    data: ModifyUserData,
+    options: UpdateOptions,
+  ) {
+    return this.usersModel.findOneAndUpdate(filter, data, options).lean();
   }
 
-  async setCode(user: string, code: string, ttl = 120) {
+  async setCode(user: string, code: string, ttl: number) {
     await this.cacheManager.set(`users:${user}:code`, code, { ttl });
+    return 'ok';
   }
 
   async getCode(user: string) {
-    const code = await this.cacheManager.get(`users:${user}:code`);
+    const code = await this.cacheManager.get<string>(`users:${user}:code`);
     return code;
   }
 
@@ -98,7 +101,7 @@ export class UsersService {
 
     const posts = await this.postsModel
       .find({ user: profile._id })
-      .populate('user')
+      .populate('user', 'first_name last_name picture username cover gender')
       .populate('comments.commentBy', 'first_name last_name username picture')
       .sort({ createdAt: -1 });
     await profile.populate('friends', 'first_name last_name username picture');
@@ -267,13 +270,11 @@ export class UsersService {
   }
 
   async search(searchTerm: string) {
-    const users = await this.usersModel
+    return this.usersModel
       .find({ $text: { $search: searchTerm } })
       .select('first_name last_name username picture')
       .limit(15)
       .lean();
-
-    return users;
   }
 
   async addToSearchHistory(id: string, searchUser: string) {

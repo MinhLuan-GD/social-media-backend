@@ -1,9 +1,10 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { UploadUtil } from './uploads.util';
 import { v2 as cloudinary } from 'cloudinary';
+import { IUploadsService } from './uploads';
 
 @Injectable()
-export class UploadsService {
+export class UploadsService implements IUploadsService {
   constructor(private uploadUtil: UploadUtil) {}
 
   async uploadToCloud(

@@ -1,4 +1,4 @@
-import { MyLogger } from '@logger/logger.service';
+import { MyLogger } from '@/logger/logger.service';
 import {
   ExceptionFilter,
   Catch,

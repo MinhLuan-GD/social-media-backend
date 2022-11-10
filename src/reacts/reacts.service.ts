@@ -1,16 +1,18 @@
-import { User, UserDocument } from '@users/schemas/user.schema';
+import { User, UserDocument } from '@/users/schemas/user.schema';
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { React, ReactDocument } from './schemas/react.schema';
+import { IReactsService } from './reacts';
 
 @Injectable()
-export class ReactsService {
-  @InjectModel(React.name)
-  private reactsModel: Model<ReactDocument>;
-
-  @InjectModel(User.name)
-  private usersModel: Model<UserDocument>;
+export class ReactsService implements IReactsService {
+  constructor(
+    @InjectModel(React.name)
+    private reactsModel: Model<ReactDocument>,
+    @InjectModel(User.name)
+    private usersModel: Model<UserDocument>,
+  ) {}
 
   async reactPost(reactBy: string, postRef: string, react: string) {
     const check = await this.reactsModel.findOne({ reactBy, postRef });

@@ -1,22 +1,27 @@
-import { User, UserDocument } from '@users/schemas/user.schema';
+import { User, UserDocument } from '@/users/schemas/user.schema';
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Post, PostDocument } from './schemas/post.schema';
-import { CreateCommentDto } from './dto/comment.dto';
-import { CreatePostDto } from './dto/post.dto';
 import { Comment } from './schemas/comment.schema';
+import { IPostsService } from './posts';
+import {
+  CreateCommentDetails,
+  CreatePostDetails,
+  UpdateCommentDetails,
+} from '@/utils/types';
 
 @Injectable()
-export class PostsService {
-  @InjectModel(Post.name)
-  private postsModel: Model<PostDocument>;
+export class PostsService implements IPostsService {
+  constructor(
+    @InjectModel(Post.name)
+    private postsModel: Model<PostDocument>,
+    @InjectModel(User.name)
+    private usersModel: Model<UserDocument>,
+  ) {}
 
-  @InjectModel(User.name)
-  private usersModel: Model<UserDocument>;
-
-  async createPost(createPostDto: CreatePostDto) {
-    return (await this.postsModel.create(createPostDto)).populate(
+  async createPost(createPostDetails: CreatePostDetails) {
+    return (await this.postsModel.create(createPostDetails)).populate(
       'user',
       'first_name last_name cover picture username',
     );
@@ -52,8 +57,11 @@ export class PostsService {
     return followingPosts;
   }
 
-  async comment(id: string, createCommentDto: CreateCommentDto) {
-    const { comment, image, postId: post, parentId } = createCommentDto;
+  async createComment(
+    commentBy: string,
+    createCommentDetails: CreateCommentDetails,
+  ) {
+    const { comment, image, postId: post, parentId } = createCommentDetails;
     const { comments } = await this.postsModel
       .findByIdAndUpdate(
         post,
@@ -63,8 +71,8 @@ export class PostsService {
               image,
               comment,
               parentId,
+              commentBy,
               commentAt: new Date(),
-              commentBy: id,
             },
           },
         },
@@ -75,8 +83,11 @@ export class PostsService {
     return comments;
   }
 
-  async updateComment(commentBy: string, createCommentDto: CreateCommentDto) {
-    const { comment, image, postId: post, id: _id } = createCommentDto;
+  async updateComment(
+    commentBy: string,
+    updateCommentDetails: UpdateCommentDetails,
+  ) {
+    const { comment, image, postId: post, id: _id } = updateCommentDetails;
     const findPost = await this.postsModel
       .findOne({ _id: post, comments: { $elemMatch: { _id, commentBy } } })
       .lean();

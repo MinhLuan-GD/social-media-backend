@@ -1,4 +1,4 @@
-import { Post } from '@posts/schemas/post.schema';
+import { Post } from '@/posts/schemas/post.schema';
 import { Schema, Prop, SchemaFactory } from '@nestjs/mongoose';
 import mongoose from 'mongoose';
 

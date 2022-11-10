@@ -1,10 +1,11 @@
 import { CacheModule, Module } from '@nestjs/common';
-import { UsersService } from './users.service';
-import { UsersController } from './users.controller';
 import { MongooseModule } from '@nestjs/mongoose';
 import { User, UserSchema } from './schemas/user.schema';
-import { Post, PostSchema } from '@posts/schemas/post.schema';
-import { userCacheOpts } from '@cache';
+import { Post, PostSchema } from '@/posts/schemas/post.schema';
+import { userCacheOpts } from '@/cache';
+import { UsersService } from './users.service';
+import { UsersController } from './users.controller';
+import { Services } from '@/utils/constants';
 
 @Module({
   imports: [
@@ -14,8 +15,18 @@ import { userCacheOpts } from '@cache';
     ]),
     CacheModule.registerAsync(userCacheOpts),
   ],
-  providers: [UsersService],
+  providers: [
+    {
+      provide: Services.USERS,
+      useClass: UsersService,
+    },
+  ],
   controllers: [UsersController],
-  exports: [UsersService],
+  exports: [
+    {
+      provide: Services.USERS,
+      useClass: UsersService,
+    },
+  ],
 })
 export class UsersModule {}

@@ -1,4 +1,4 @@
-import { RequestWithUser } from '@auth/interfaces/auth.interface';
+import { RequestWithUser } from '@/auth/interfaces/auth.interface';
 import { Routes, Services } from '@/utils/constants';
 import {
   Body,

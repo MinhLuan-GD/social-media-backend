@@ -1,20 +1,22 @@
-import { JwtAuthGuard } from '@auth/jwt-auth.guard';
+import { Routes, Services } from '@/utils/constants';
+import { JwtAuthGuard } from '@/auth/jwt-auth.guard';
 import {
   Body,
   Controller,
+  Inject,
   Post,
   UploadedFiles,
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
 import { FilesInterceptor } from '@nestjs/platform-express';
-import { UploadsService } from './uploads.service';
+import { IUploadsService } from './uploads';
 import { UploadUtil } from './uploads.util';
 
-@Controller('uploads')
+@Controller(Routes.UPLOADS)
 export class UploadsController {
   constructor(
-    private uploadsService: UploadsService,
+    @Inject(Services.UPLOADS) private uploadsService: IUploadsService,
     private uploadUtil: UploadUtil,
   ) {}
 

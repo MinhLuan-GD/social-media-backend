@@ -1,4 +1,4 @@
-import { User, UserDocument } from '@users/schemas/user.schema';
+import { User, UserDocument } from '@/users/schemas/user.schema';
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
@@ -6,14 +6,16 @@ import {
   Conversation,
   ConversationDocument,
 } from './schemas/conversation.schema';
+import { IChatService } from './chat';
 
 @Injectable()
-export class ChatService {
-  @InjectModel(Conversation.name)
-  private conversationsModel: Model<ConversationDocument>;
-
-  @InjectModel(User.name)
-  private usersModel: Model<UserDocument>;
+export class ChatService implements IChatService {
+  constructor(
+    @InjectModel(Conversation.name)
+    private conversationsModel: Model<ConversationDocument>,
+    @InjectModel(User.name)
+    private usersModel: Model<UserDocument>,
+  ) {}
 
   async conversations(id: string, skip = 0) {
     const { friends } = await this.usersModel.findById(id).lean();

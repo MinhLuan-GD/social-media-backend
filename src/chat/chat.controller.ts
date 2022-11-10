@@ -1,5 +1,6 @@
-import { RequestWithUser } from '@auth/interfaces/auth.interface';
-import { JwtAuthGuard } from '@auth/jwt-auth.guard';
+import { Routes, Services } from '@/utils/constants';
+import { RequestWithUser } from '@/auth/interfaces/auth.interface';
+import { JwtAuthGuard } from '@/auth/jwt-auth.guard';
 import {
   Controller,
   Put,
@@ -7,20 +8,21 @@ import {
   Request,
   Body,
   Patch,
+  Inject,
 } from '@nestjs/common';
 import { SkipThrottle } from '@nestjs/throttler';
-import { ChatService } from './chat.service';
-import { CreateMessageDto } from './dto/message.dto';
+import { IChatService } from './chat';
+import { CreateMessageDto } from './dtos/CreateMessage.dto';
 
 @SkipThrottle()
-@Controller('chat')
+@Controller(Routes.CHAT)
 export class ChatController {
-  constructor(private chatService: ChatService) {}
+  constructor(@Inject(Services.CHAT) private chatService: IChatService) {}
 
   @UseGuards(JwtAuthGuard)
   @Put('conversations')
   async conversations(@Request() req: RequestWithUser) {
-    return this.chatService.conversations(req.user._id);
+    return this.chatService.conversations(req.user._id, 0);
   }
 
   @UseGuards(JwtAuthGuard)

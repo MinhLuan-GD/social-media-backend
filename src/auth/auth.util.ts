@@ -1,14 +1,15 @@
-import { UsersService } from '@users/users.service';
 import { JwtService } from '@nestjs/jwt';
 import { OAuth2Client } from 'google-auth-library';
 import { MailerService } from '@nestjs-modules/mailer';
-import { MyLogger } from '@logger/logger.service';
-import { Injectable } from '@nestjs/common';
+import { MyLogger } from '@/logger/logger.service';
+import { Inject, Injectable } from '@nestjs/common';
+import { Services } from '@/utils/constants';
+import { IUsersService } from '@/users/users';
 
 @Injectable()
 export class AuthUtil {
   constructor(
-    public usersService: UsersService,
+    @Inject(Services.USERS) public usersService: IUsersService,
     public jwtService: JwtService,
     private mailerService: MailerService,
   ) {
@@ -35,7 +36,7 @@ export class AuthUtil {
     const baseUsername = this.convert(username);
     username = this.makeId(baseUsername);
     while (true)
-      if (await this.usersService.findByUsername(username))
+      if (await this.usersService.findUser({ username }))
         username = this.makeId(baseUsername);
       else return username;
   }

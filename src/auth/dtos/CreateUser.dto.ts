@@ -1,6 +1,6 @@
 import { IsEmail, IsIn, IsNotEmpty, IsString, Length } from 'class-validator';
 
-export class CreateSignupDto {
+export class CreateUserDto {
   @IsNotEmpty({ message: 'This field is not empty!' })
   @IsString()
   @Length(2, 30, { message: 'First name must be between 2 and 30 characters' })

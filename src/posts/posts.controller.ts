@@ -1,5 +1,7 @@
-import { RequestWithUser } from '@auth/interfaces/auth.interface';
-import { JwtAuthGuard } from '@auth/jwt-auth.guard';
+import { Routes, Services } from '@/utils/constants';
+import { UpdateCommentDetails } from '@/utils/types';
+import { RequestWithUser } from '@/auth/interfaces/auth.interface';
+import { JwtAuthGuard } from '@/auth/jwt-auth.guard';
 import {
   Body,
   Controller,
@@ -9,16 +11,17 @@ import {
   Get,
   Param,
   Delete,
+  Inject,
 } from '@nestjs/common';
 import { SkipThrottle } from '@nestjs/throttler';
-import { CreateCommentDto } from './dto/comment.dto';
-import { CreatePostDto } from './dto/post.dto';
-import { PostsService } from './posts.service';
+import { CreateCommentDto } from './dtos/CreateComment.dto';
+import { CreatePostDto } from './dtos/CreatePost.dto';
+import { IPostsService } from './posts';
 
 @SkipThrottle()
-@Controller('posts')
+@Controller(Routes.POSTS)
 export class PostsController {
-  constructor(private postsService: PostsService) {}
+  constructor(@Inject(Services.POSTS) private postsService: IPostsService) {}
 
   @UseGuards(JwtAuthGuard)
   @Put('create-post')
@@ -38,16 +41,16 @@ export class PostsController {
     @Request() req: RequestWithUser,
     @Body() createCommentDto: CreateCommentDto,
   ) {
-    return this.postsService.comment(req.user._id, createCommentDto);
+    return this.postsService.createComment(req.user._id, createCommentDto);
   }
 
   @UseGuards(JwtAuthGuard)
   @Put('update-comment')
   async updateComment(
     @Request() req: RequestWithUser,
-    @Body() createCommentDto: CreateCommentDto,
+    @Body() updateCommentDetails: UpdateCommentDetails,
   ) {
-    return this.postsService.updateComment(req.user._id, createCommentDto);
+    return this.postsService.updateComment(req.user._id, updateCommentDetails);
   }
 
   @UseGuards(JwtAuthGuard)

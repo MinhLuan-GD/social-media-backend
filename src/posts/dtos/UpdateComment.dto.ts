@@ -1,4 +1,4 @@
-export class CreateCommentDto {
+export class UpdateCommentDto {
   id: string;
 
   postId: string;

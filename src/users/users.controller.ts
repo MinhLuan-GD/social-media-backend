@@ -1,5 +1,7 @@
-import { RequestWithUser } from '@auth/interfaces/auth.interface';
-import { JwtAuthGuard } from '@auth/jwt-auth.guard';
+import { Routes, Services } from '@/utils/constants';
+import { ModifyUserDetailsData } from '@/utils/types';
+import { RequestWithUser } from '@/auth/interfaces/auth.interface';
+import { JwtAuthGuard } from '@/auth/jwt-auth.guard';
 import {
   Controller,
   Get,
@@ -10,14 +12,15 @@ import {
   Patch,
   Put,
   Post,
+  Inject,
 } from '@nestjs/common';
 import { SkipThrottle } from '@nestjs/throttler';
-import { UsersService } from './users.service';
+import { IUsersService } from './users';
 
 @SkipThrottle()
-@Controller('users')
+@Controller(Routes.USERS)
 export class UsersController {
-  constructor(private usersService: UsersService) {}
+  constructor(@Inject(Services.USERS) private usersService: IUsersService) {}
 
   @Post('get-user-picture')
   async getUserPicture(@Body('email') email: string) {
@@ -39,14 +42,14 @@ export class UsersController {
     @Request() req: RequestWithUser,
     @Body('url') url: string,
   ) {
-    this.usersService.updateUser({ _id: req.user._id }, { picture: url });
+    this.usersService.updateUser({ _id: req.user._id }, { picture: url }, {});
     return url;
   }
 
   @UseGuards(JwtAuthGuard)
   @Patch('update-cover')
   async updateCover(@Request() req: RequestWithUser, @Body('url') url: string) {
-    this.usersService.updateUser({ _id: req.user._id }, { cover: url });
+    this.usersService.updateUser({ _id: req.user._id }, { cover: url }, {});
     return url;
   }
 
@@ -54,7 +57,7 @@ export class UsersController {
   @Patch('update-details')
   async updateDetails(
     @Request() req: RequestWithUser,
-    @Body('infos') infos: string,
+    @Body('infos') infos: ModifyUserDetailsData,
   ) {
     const { details } = await this.usersService.updateUser(
       { _id: req.user._id },

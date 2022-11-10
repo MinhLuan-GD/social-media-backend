@@ -1,13 +1,13 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { compareSync, hash } from 'bcrypt';
+import { IAuthService } from './auth';
 import { AuthUtil } from './auth.util';
-import { CreateSignupDto } from './dto/signup.dto';
-import { AuthUser } from './interfaces/auth.interface';
+import { CreateUserDto } from './dtos/CreateUser.dto';
 
 @Injectable()
-export class AuthService extends AuthUtil {
-  async validateUser(email: string, pass: string): Promise<any> {
-    const user = await this.usersService.findByEmailAndFollow(email);
+export class AuthService extends AuthUtil implements IAuthService {
+  async validateUser(email: string, pass: string) {
+    const user = await this.usersService.findUserAndFollow(email);
     if (user && compareSync(pass, user.password)) {
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { password, ...result } = user;
@@ -19,17 +19,17 @@ export class AuthService extends AuthUtil {
   async getToken(
     payload: any,
     expiresIn: string | number = process.env.EXPIRES_IN,
-  ): Promise<{ token: string }> {
+  ) {
     return { token: this.jwtService.sign(payload, { expiresIn }) };
   }
 
-  async login(id: string, email: string): Promise<{ token: string }> {
+  async login(id: string, email: string) {
     const payload = { id, email };
     return this.getToken(payload);
   }
 
-  async signup(input: CreateSignupDto): Promise<AuthUser & { token: string }> {
-    const findUser = await this.usersService.findByEmailAndFollow(input.email);
+  async signup(input: CreateUserDto) {
+    const findUser = await this.usersService.findUserAndFollow(input.email);
     if (findUser) throw new HttpException('conflict', HttpStatus.CONFLICT);
     const password = await hash(input.password, 10);
     const username = await this.gUsername(input.first_name + input.last_name);
@@ -67,7 +67,7 @@ export class AuthService extends AuthUtil {
       );
     }
 
-    const user = await this.usersService.findById(id);
+    const user = await this.usersService.findUser({ _id: id });
     if (user.verified) {
       throw new HttpException(
         `This email is already activated.`,
@@ -75,12 +75,12 @@ export class AuthService extends AuthUtil {
       );
     }
 
-    await this.usersService.updateUser({ _id: id }, { verified: true });
+    await this.usersService.updateUser({ _id: id }, { verified: true }, {});
     return 'Account has been activated successfully.';
   }
 
   async sendVerification(id: string) {
-    const user = await this.usersService.findById(id);
+    const user = await this.usersService.findUser({ _id: id });
     if (user.verified) {
       throw new HttpException(
         `This account is already activated.`,
@@ -97,15 +97,15 @@ export class AuthService extends AuthUtil {
   }
 
   async sendResetPasswordCode(email: string) {
-    const user = await this.usersService.findByEmail(email);
+    const user = await this.usersService.findUser({ email });
     const code = this.generateCode(5);
-    await this.usersService.setCode(user._id, code);
+    await this.usersService.setCode(user._id, code, 120);
     this.sendResetCode(user.email, user.first_name, code);
     return 'Email reset code has been sent to your email';
   }
 
   async validateResetCode(email: string, code: string) {
-    const user = await this.usersService.findByEmail(email);
+    const user = await this.usersService.findUser({ email });
     if ((await this.usersService.getCode(user._id)) != code) {
       throw new HttpException(
         'Verification code is wrong..',
@@ -118,7 +118,7 @@ export class AuthService extends AuthUtil {
 
   async changePassword(email: string, iPassword: string) {
     const password = await hash(iPassword, 10);
-    await this.usersService.updateUser({ email }, { password });
+    await this.usersService.updateUser({ email }, { password }, {});
     return 'ok';
   }
 }

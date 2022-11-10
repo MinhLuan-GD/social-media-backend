@@ -1,5 +1,6 @@
-import { RequestWithUser } from '@auth/interfaces/auth.interface';
-import { JwtAuthGuard } from '@auth/jwt-auth.guard';
+import { Routes, Services } from '@/utils/constants';
+import { RequestWithUser } from '@/auth/interfaces/auth.interface';
+import { JwtAuthGuard } from '@/auth/jwt-auth.guard';
 import {
   Body,
   Controller,
@@ -8,14 +9,15 @@ import {
   Request,
   Get,
   Param,
+  Inject,
 } from '@nestjs/common';
 import { SkipThrottle } from '@nestjs/throttler';
-import { ReactsService } from './reacts.service';
+import { IReactsService } from './reacts';
 
 @SkipThrottle()
-@Controller('reacts')
+@Controller(Routes.REACTS)
 export class ReactsController {
-  constructor(private reactsService: ReactsService) {}
+  constructor(@Inject(Services.REACTS) private reactsService: IReactsService) {}
 
   @UseGuards(JwtAuthGuard)
   @Patch('react-post')
