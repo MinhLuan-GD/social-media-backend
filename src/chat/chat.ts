@@ -4,6 +4,8 @@ import { Message } from './schemas/message.schema';
 export interface IChatService {
   conversations(id: string, skip: number): Promise<Conversation[]>;
 
+  deleteConversation(id: string);
+
   addMessage(
     sender: string,
     receiver: string,

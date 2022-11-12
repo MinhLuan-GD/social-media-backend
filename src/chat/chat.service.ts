@@ -168,4 +168,8 @@ export class ChatService implements IChatService {
 
     return messages;
   }
+
+  deleteConversation(id: string) {
+    throw new Error('Method not implemented.');
+  }
 }

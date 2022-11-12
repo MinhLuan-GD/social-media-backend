@@ -7,6 +7,12 @@ export type ConversationDocument = Conversation & Document;
 
 @Schema({ collection: 'conversations', timestamps: true })
 export class Conversation {
+  @Prop({ default: 'conversation', enum: ['group', 'conversation'] })
+  type: string;
+
+  @Prop({ default: '' })
+  name: string;
+
   @Prop({
     type: [
       {

@@ -6,6 +6,7 @@ export enum Routes {
   POSTS = 'posts',
   REACTS = 'reacts',
   UPLOADS = 'uploads',
+  GROUPS = 'groups',
 }
 
 export enum Services {
@@ -16,4 +17,5 @@ export enum Services {
   POSTS = 'POSTS_SERVICE',
   REACTS = 'REACTS_SERVICE',
   UPLOADS = 'UPLOADS_SERVICE',
+  GROUPS = 'GROUPS_SERVICE',
 }
