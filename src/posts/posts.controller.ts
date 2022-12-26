@@ -1,7 +1,11 @@
-import { Routes, Services } from '@/utils/constants';
-import { UpdateCommentDetails } from '@/utils/types';
-import { RequestWithUser } from '@/auth/interfaces/auth.interface';
-import { JwtAuthGuard } from '@/auth/jwt-auth.guard';
+// import { Routes, Services } from '@/utils/constants';
+// import { UpdateCommentDetails } from '@/utils/types';
+// import { RequestWithUser } from '@/auth/interfaces/auth.interface';
+// import { JwtAuthGuard } from '@/auth/jwt-auth.guard';
+import { Routes, Services } from '../utils/constants';
+import { UpdateCommentDetails } from '../utils/types';
+import { RequestWithUser } from '../auth/interfaces/auth.interface';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import {
   Body,
   Controller,
@@ -12,6 +16,7 @@ import {
   Param,
   Delete,
   Inject,
+  Patch,
 } from '@nestjs/common';
 import { SkipThrottle } from '@nestjs/throttler';
 import { CreateCommentDto } from './dtos/CreateComment.dto';
@@ -37,7 +42,7 @@ export class PostsController {
 
   @UseGuards(JwtAuthGuard)
   @Put('comment')
-  async comment(
+  comment(
     @Request() req: RequestWithUser,
     @Body() createCommentDto: CreateCommentDto,
   ) {
@@ -69,5 +74,16 @@ export class PostsController {
   @Delete('delete-post/:id')
   async deletePost(@Param('id') id: string) {
     return this.postsService.deletePost(id);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Patch(':id/react')
+  async reactPost(
+    @Request() req: RequestWithUser,
+    @Param('id') id: string,
+    @Body() body: any,
+  ) {
+    const { react } = body;
+    return this.postsService.reactPost(id, req.user._id, react);
   }
 }

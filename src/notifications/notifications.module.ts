@@ -6,7 +6,7 @@ import {
   Notification,
   NotificationSchema,
 } from './schemas/notification.schema';
-import { Services } from '@/utils/constants';
+import { Services } from '../utils/constants';
 
 @Module({
   imports: [

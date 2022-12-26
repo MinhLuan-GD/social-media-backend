@@ -43,12 +43,6 @@ export class HttpExceptionFilter implements ExceptionFilter {
         JSON.stringify(devErrorResponse, null, 2),
     );
 
-    response
-      .status(status)
-      .json(
-        process.env.NODE_ENV === 'local.dev'
-          ? devErrorResponse
-          : prodErrorResponse,
-      );
+    response.status(status).json(devErrorResponse);
   }
 }

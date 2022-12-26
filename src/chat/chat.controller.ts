@@ -1,6 +1,6 @@
-import { Routes, Services } from '@/utils/constants';
-import { RequestWithUser } from '@/auth/interfaces/auth.interface';
-import { JwtAuthGuard } from '@/auth/jwt-auth.guard';
+import { Routes, Services } from '../utils/constants';
+import { RequestWithUser } from '../auth/interfaces/auth.interface';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import {
   Controller,
   Put,

@@ -1,4 +1,4 @@
-import { Routes, Services } from '@/utils/constants';
+import { Routes, Services } from '../utils/constants';
 import {
   Controller,
   Post,

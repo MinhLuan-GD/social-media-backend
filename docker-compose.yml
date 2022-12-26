@@ -1,4 +1,4 @@
-version: "3.9"
+version: '3.9'
 
 services:
   db:
@@ -28,12 +28,6 @@ services:
     depends_on:
       - db
       - store
-
-  ws:
-    container_name: ws
-    image: smb-ws
-    ports:
-      - 8900:8900
 
 volumes:
   db: {}

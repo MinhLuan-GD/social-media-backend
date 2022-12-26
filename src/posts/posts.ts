@@ -25,4 +25,6 @@ export interface IPostsService {
   savePost(id: string, post: string): Promise<string>;
 
   deletePost(id: string): Promise<{ status: string }>;
+
+  reactPost(postId: string, userId: string, react: string): Promise<string>;
 }

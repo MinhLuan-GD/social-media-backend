@@ -6,8 +6,8 @@ import {
   ConversationSchema,
 } from './schemas/conversation.schema';
 import { MongooseModule } from '@nestjs/mongoose';
-import { User, UserSchema } from '@/users/schemas/user.schema';
-import { Services } from '@/utils/constants';
+import { User, UserSchema } from '../users/schemas/user.schema';
+import { Services } from '../utils/constants';
 
 @Module({
   imports: [

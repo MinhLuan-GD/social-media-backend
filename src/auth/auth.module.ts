@@ -10,7 +10,7 @@ import { LocalStrategy } from './local.strategy';
 import { AuthUtil } from './auth.util';
 import { APP_GUARD } from '@nestjs/core';
 import { ThrottlerGuard } from '@nestjs/throttler';
-import { Services } from '@/utils/constants';
+import { Services } from '../utils/constants';
 
 @Module({
   imports: [UsersModule, PassportModule, JwtModule.registerAsync(jwtOpts)],

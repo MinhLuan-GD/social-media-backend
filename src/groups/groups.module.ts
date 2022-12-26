@@ -3,15 +3,14 @@ import { GroupsService } from './groups.service';
 import { GroupsController } from './groups.controller';
 import { MongooseModule } from '@nestjs/mongoose';
 import { Group, GroupSchema } from './schemas/group.schema';
-import { GroupMessage } from './schemas/message.schema';
-import { GroupMemberSchema } from './schemas/member.schema';
-import { Services } from '@/utils/constants';
+import { GroupMessage, GroupMessageSchema } from './schemas/message.schema';
+import { Services } from '../utils/constants';
 
 @Module({
   imports: [
     MongooseModule.forFeature([
       { name: Group.name, schema: GroupSchema },
-      { name: GroupMessage.name, schema: GroupMemberSchema },
+      { name: GroupMessage.name, schema: GroupMessageSchema },
     ]),
   ],
   providers: [

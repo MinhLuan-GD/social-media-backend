@@ -1,10 +1,10 @@
 import { Module } from '@nestjs/common';
-import { User, UserSchema } from '@/users/schemas/user.schema';
+import { User, UserSchema } from '../users/schemas/user.schema';
 import { MongooseModule } from '@nestjs/mongoose';
 import { Post, PostSchema } from './schemas/post.schema';
 import { PostsService } from './posts.service';
 import { PostsController } from './posts.controller';
-import { Services } from '@/utils/constants';
+import { Services } from '../utils/constants';
 
 @Module({
   imports: [

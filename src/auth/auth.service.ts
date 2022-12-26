@@ -18,9 +18,10 @@ export class AuthService extends AuthUtil implements IAuthService {
 
   async getToken(
     payload: any,
-    expiresIn: string | number = process.env.EXPIRES_IN,
+    expiresIn: string | number = process.env.EXPIRES_IN || '7d',
+    secret: string = process.env.SECRET_KEY || 'secret',
   ) {
-    return { token: this.jwtService.sign(payload, { expiresIn }) };
+    return { token: this.jwtService.sign(payload, { expiresIn, secret }) };
   }
 
   async login(id: string, email: string) {

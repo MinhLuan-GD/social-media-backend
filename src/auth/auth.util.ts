@@ -1,17 +1,16 @@
 import { JwtService } from '@nestjs/jwt';
 import { OAuth2Client } from 'google-auth-library';
 import { MailerService } from '@nestjs-modules/mailer';
-import { MyLogger } from '@/logger/logger.service';
+import { MyLogger } from '../logger/logger.service';
 import { Inject, Injectable } from '@nestjs/common';
-import { Services } from '@/utils/constants';
-import { IUsersService } from '@/users/users';
+import { Services } from '../utils/constants';
+import { IUsersService } from '../users/users';
 
 @Injectable()
 export class AuthUtil {
   constructor(
     @Inject(Services.USERS) public usersService: IUsersService,
-    public jwtService: JwtService,
-    private mailerService: MailerService,
+    public jwtService: JwtService, // private mailerService: MailerService,
   ) {
     this.myOAuth2Client.setCredentials({
       refresh_token: process.env.MAILING_REFRESH,
@@ -55,10 +54,10 @@ export class AuthUtil {
         accessToken: myAccessToken,
       },
     };
-    this.mailerService
-      .sendMail(mailOptions)
-      .then((val) => val)
-      .catch((res) => this.logger.error(res));
+    // this.mailerService
+    //   .sendMail(mailOptions)
+    //   .then((val) => val)
+    //   .catch((res) => this.logger.error(res));
   }
 
   async sendResetCode(email: string, name: string, code: string) {
@@ -75,10 +74,10 @@ export class AuthUtil {
         accessToken: myAccessToken,
       },
     };
-    this.mailerService
-      .sendMail(mailOptions)
-      .then((val) => val)
-      .catch((res) => this.logger.error(res));
+    // this.mailerService
+    //   .sendMail(mailOptions)
+    //   .then((val) => val)
+    //   .catch((res) => this.logger.error(res));
   }
 
   generateCode(length: number) {

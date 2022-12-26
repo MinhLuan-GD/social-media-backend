@@ -103,6 +103,7 @@ export class UsersService implements IUsersService {
       .find({ user: profile._id })
       .populate('user', 'first_name last_name picture username cover gender')
       .populate('comments.commentBy', 'first_name last_name username picture')
+      .populate('reacts.user', 'first_name last_name picture username')
       .sort({ createdAt: -1 });
     await profile.populate('friends', 'first_name last_name username picture');
     return {

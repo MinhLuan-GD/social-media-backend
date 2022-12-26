@@ -40,4 +40,8 @@ export class UploadsService implements IUploadsService {
         throw new HttpException(err.error.message, HttpStatus.CONFLICT);
       });
   }
+
+  deleteOnCloud(path: string): Promise<any> {
+    throw new Error('Method not implemented.');
+  }
 }

@@ -1,4 +1,4 @@
-import { URL_D_PIC } from '@/config/async.config';
+import { URL_D_PIC } from '../../config/async.config';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import mongoose, { Document } from 'mongoose';
 import { Details, DetailsSchema } from './details.schema';

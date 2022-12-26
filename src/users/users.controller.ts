@@ -27,6 +27,13 @@ export class UsersController {
     return this.usersService.getUserPicture(email);
   }
 
+  @Get(':id/info')
+  async getUserInfo(@Param('id') id: string) {
+    const { _id, first_name, last_name, picture } =
+      await this.usersService.findUser({ _id: id });
+    return { _id, first_name, last_name, picture };
+  }
+
   @UseGuards(JwtAuthGuard)
   @Get('get-profile/:username')
   async getProfile(

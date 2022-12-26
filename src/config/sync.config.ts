@@ -13,6 +13,7 @@ const compressionOpts: CompressionOptions = {
   threshold: 40000,
 };
 
-const corsOpts: CorsOptions = { origin: process.env.ORIGIN };
+const corsOpts: CorsOptions = {};
+// const corsOpts: CorsOptions = { origin: process.env.ORIGIN };
 
 export { cloudinaryOpts, compressionOpts, corsOpts };

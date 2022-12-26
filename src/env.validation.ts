@@ -29,9 +29,6 @@ class EnvironmentVariables {
   @IsString()
   DB_HOST: string;
 
-  @IsInt()
-  DB_PORT: number;
-
   @IsString()
   DB_NAME: string;
 
@@ -40,18 +37,6 @@ class EnvironmentVariables {
 
   @IsString()
   DB_PASSWORD: string;
-
-  @IsInt()
-  DB_MAX_POOL_SIZE: number;
-
-  @IsInt()
-  DB_MIN_POOL_SIZE: number;
-
-  @IsInt()
-  DB_SOCKET_TIMEOUT: number;
-
-  @IsInt()
-  DB_FAMILY: number;
 
   @IsString()
   STORE_HOST: string;

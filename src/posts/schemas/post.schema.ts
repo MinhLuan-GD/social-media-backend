@@ -1,7 +1,8 @@
-import { User } from '@/users/schemas/user.schema';
+import { User } from '../../users/schemas/user.schema';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import mongoose, { Document } from 'mongoose';
 import { Comment, CommentSchema } from './comment.schema';
+import { React, ReactSchema } from './react.schema';
 
 interface Image {
   url: string;
@@ -30,13 +31,13 @@ export class Post {
   @Prop([CommentSchema])
   comments: Comment[];
 
+  @Prop({ type: [ReactSchema], default: [] })
+  reacts: React[];
+
   @Prop()
   background: string;
 
-  @Prop()
   createdAt: Date;
-
-  @Prop()
   updatedAt: Date;
 }
 

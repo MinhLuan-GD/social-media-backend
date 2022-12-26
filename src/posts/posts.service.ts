@@ -1,4 +1,5 @@
-import { User, UserDocument } from '@/users/schemas/user.schema';
+// import { User, UserDocument } from '@/users/schemas/user.schema';
+import { User, UserDocument } from '../users/schemas/user.schema';
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
@@ -9,7 +10,7 @@ import {
   CreateCommentDetails,
   CreatePostDetails,
   UpdateCommentDetails,
-} from '@/utils/types';
+} from '../utils/types';
 
 @Injectable()
 export class PostsService implements IPostsService {
@@ -21,10 +22,9 @@ export class PostsService implements IPostsService {
   ) {}
 
   async createPost(createPostDetails: CreatePostDetails) {
-    return (await this.postsModel.create(createPostDetails)).populate(
-      'user',
-      'first_name last_name cover picture username',
-    );
+    const post = await this.postsModel.create(createPostDetails);
+    // return post.populate('user', 'first_name last_name cover picture username');
+    return post;
   }
 
   async getAllPosts(id: string) {
@@ -37,19 +37,22 @@ export class PostsService implements IPostsService {
         .find({ user: user })
         .populate('user', 'first_name last_name picture username cover gender')
         .populate('comments.commentBy', 'first_name last_name picture username')
+        .populate('reacts.user', 'first_name last_name picture username')
         .sort({ createdAt: -1 })
         .limit(5),
     );
 
     const followingPosts = (await Promise.all(promises)).flat();
-    // const userPosts = await this.postsModel
-    //   .find({ user: id })
-    //   .populate('user', 'first_name last_name picture username cover gender')
-    //   .populate('comments.commentBy', 'first_name last_name picture username')
-    //   .sort({ createdAt: -1 })
-    //   .limit(5);
+    const userPosts = await this.postsModel
+      .find({ user: id })
+      .populate('user', 'first_name last_name picture username cover gender')
+      .populate('comments.commentBy', 'first_name last_name picture username')
+      .populate('reacts.user', 'first_name last_name picture username')
+      .sort({ createdAt: -1 })
+      .limit(5);
 
-    // followingPosts.push(...[...userPosts]);
+    followingPosts.push(...[...userPosts]);
+
     followingPosts.sort((a, b) => {
       return b.createdAt.getTime() - a.createdAt.getTime();
     });
@@ -74,6 +77,9 @@ export class PostsService implements IPostsService {
               commentBy,
               commentAt: new Date(),
             },
+          },
+          $set: {
+            createdAt: new Date(),
           },
         },
         { new: true },
@@ -176,5 +182,57 @@ export class PostsService implements IPostsService {
   async deletePost(id: string) {
     this.postsModel.findByIdAndRemove(id, () => ({}));
     return { status: 'ok' };
+  }
+
+  async reactPost(postId: string, userId: string, react: string) {
+    const post = await this.postsModel.findOne({
+      _id: postId,
+      'reacts.user': userId,
+    });
+    if (post) {
+      if (
+        post.reacts.some(
+          (e: any) => e.user.toString() == userId && e.react == react,
+        )
+      ) {
+        this.postsModel.findByIdAndUpdate(
+          postId,
+          {
+            $pull: { reacts: { user: userId } },
+          },
+          {},
+          () => ({}),
+        );
+      } else {
+        this.postsModel.findOneAndUpdate(
+          {
+            _id: postId,
+            'reacts.user': userId,
+          },
+          {
+            $set: {
+              'reacts.$.react': react,
+            },
+          },
+          {},
+          () => ({}),
+        );
+      }
+    } else {
+      this.postsModel.findByIdAndUpdate(
+        postId,
+        {
+          $push: {
+            reacts: {
+              user: userId,
+              react,
+            },
+          },
+        },
+        {},
+        () => ({}),
+      );
+    }
+    return 'ok';
   }
 }

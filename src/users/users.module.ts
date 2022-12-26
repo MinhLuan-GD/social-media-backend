@@ -5,7 +5,7 @@ import { Post, PostSchema } from '@/posts/schemas/post.schema';
 import { userCacheOpts } from '@/cache';
 import { UsersService } from './users.service';
 import { UsersController } from './users.controller';
-import { Services } from '@/utils/constants';
+import { Services } from '../utils/constants';
 
 @Module({
   imports: [

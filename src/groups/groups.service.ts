@@ -3,15 +3,14 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { IGroupsService } from './groups';
 import { Group, GroupDocument } from './schemas/group.schema';
-import { GroupMember } from './schemas/member.schema';
-import { GroupMessageDocument } from './schemas/message.schema';
+import { GroupMessage, GroupMessageDocument } from './schemas/message.schema';
 
 @Injectable()
 export class GroupsService implements IGroupsService {
   constructor(
     @InjectModel(Group.name)
     private groupsModel: Model<GroupDocument>,
-    @InjectModel(GroupMember.name)
+    @InjectModel(GroupMessage.name)
     private gMesModel: Model<GroupMessageDocument>,
   ) {}
   createGroup(params: any) {

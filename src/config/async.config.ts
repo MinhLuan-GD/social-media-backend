@@ -1,4 +1,4 @@
-import { validate } from '@/env.validation';
+import { validate } from '../env.validation';
 import { MailerAsyncOptions } from '@nestjs-modules/mailer/dist/interfaces/mailer-async-options.interface';
 import {
   ConfigModule,
