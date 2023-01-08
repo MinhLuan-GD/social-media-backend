@@ -7,7 +7,7 @@ const userCacheOpts: CacheModuleAsyncOptions = {
   useFactory: async (config: ConfigService) => ({
     store: redisStore,
     host: config.get('STORE_HOST'),
-    port: config.get('STORE_PORT'),
+    port: 6379,
     password: config.get('STORE_PASSWORD'),
   }),
   inject: [ConfigService],

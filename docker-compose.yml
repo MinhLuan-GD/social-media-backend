@@ -2,29 +2,46 @@ version: '3.9'
 
 services:
   db:
-    container_name: database
-    image: mongo:${MONGO_TAG}
+    container_name: smb_database
+    image: mongo:6
     restart: always
     environment:
-      - MONGO_INITDB_ROOT_USERNAME=${DB_USERNAME}
-      - MONGO_INITDB_ROOT_PASSWORD=${DB_PASSWORD}
+      MONGO_INITDB_ROOT_USERNAME: luan
+      MONGO_INITDB_ROOT_PASSWORD: luan123
     command: mongod
     volumes:
       - db:/data/db
 
   store:
-    container_name: store
-    image: redis:${REDIS_TAG}
+    container_name: smb_store
+    image: redis:7.0.4-bullseye
     restart: always
-    command: redis-server --save 60 1 --loglevel warning --requirepass ${STORE_PASSWORD}
+    command: redis-server --save 60 1 --loglevel warning --requirepass luan123
     volumes:
       - store:/data
 
   api:
     build: .
-    container_name: api
+    container_name: smb_api
+    environment:
+      BACK_END_URL: http://localhost:8000
+      FONT_END_URL: http://localhost:3000
+      DB_HOST: db
+      DB_NAME: social-media
+      DB_USERNAME: luan
+      DB_PASSWORD: luan123
+      STORE_HOST: store
+      STORE_PASSWORD: luan123
+      SECRET_KEY: secretKey
+      EXPIRES_IN: 7d
+      ALGORITHM: HS384
+      ORIGIN: '*'
+      THROTTLE_TTL: 60
+      THROTTLE_LIMIT: 10
+    env_file:
+      - ./.env/docker.dev.env
     ports:
-      - ${PORT}:${PORT}
+      - 8000:8000
     depends_on:
       - db
       - store

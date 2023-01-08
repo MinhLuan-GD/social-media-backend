@@ -23,8 +23,7 @@ export class PostsService implements IPostsService {
 
   async createPost(createPostDetails: CreatePostDetails) {
     const post = await this.postsModel.create(createPostDetails);
-    // return post.populate('user', 'first_name last_name cover picture username');
-    return post;
+    return post.populate('user', 'first_name last_name cover picture username');
   }
 
   async getAllPosts(id: string) {
