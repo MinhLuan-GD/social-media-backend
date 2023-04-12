@@ -23,6 +23,7 @@ services:
       context: .
       target: development
       dockerfile: Dockerfile
+    command: yarn start:dev
     container_name: social-media-api
     tags:
       - social-media-api:latest
