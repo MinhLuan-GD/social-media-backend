@@ -25,9 +25,6 @@ services:
       dockerfile: Dockerfile
     command: yarn start:dev
     container_name: social-media-api
-    tags:
-      - social-media-api:latest
-      - social-media-api:1.0.0
     environment:
       NODE_ENV: development
       PORT: 8000
@@ -57,7 +54,11 @@ services:
       MAILING_REFRESH: 
       CLOUD_NAME: 
       CLOUD_API_KEY: 
-      CLOUD_API_SECRET: 
+      CLOUD_API_SECRET:
+    volumes:
+      - .:/app
+      - /app/node_modules
+      - /app/dist
     ports:
       - 8000:8000
     depends_on:
