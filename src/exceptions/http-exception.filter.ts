@@ -33,22 +33,11 @@ export class HttpExceptionFilter implements ExceptionFilter {
       message,
     };
 
-    const prodErrorResponse: any = {
-      statusCode: status,
-      message,
-    };
-
     this.logger.error(
       `request method: ${request.method} request url${request.url}\n` +
         JSON.stringify(devErrorResponse, null, 2),
     );
 
-    response
-      .status(status)
-      .json(
-        process.env.NODE_ENV === 'local.dev'
-          ? devErrorResponse
-          : prodErrorResponse,
-      );
+    response.status(status).json(devErrorResponse);
   }
 }
