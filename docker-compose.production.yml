@@ -1,0 +1,40 @@
+version: "3.9"
+
+services:
+  db:
+    container_name: social-media-db
+    image: mongo:latest
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
+    command: mongod
+    volumes:
+      - db:/data/db
+
+  store:
+    container_name: social-media-store
+    image: redis:latest
+    command: redis-server --save 60 1 --loglevel warning --requirepass ${REDIS_PASSWORD}
+    volumes:
+      - store:/data
+
+  api:
+    build:
+      context: .
+      target: production
+      dockerfile: Dockerfile
+    container_name: social-media-api
+    tags:
+      - social-media-api:latest
+      - social-media-api:1.0.0
+    env_file:
+      - .env
+    ports:
+      - ${PORT}:${PORT}
+    depends_on:
+      - db
+      - store
+
+volumes:
+  db: {}
+  store: {}
