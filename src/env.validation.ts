@@ -8,8 +8,7 @@ import {
 } from 'class-validator';
 
 enum Environment {
-  Development_Docker = 'docker.dev',
-  Development_Local = 'local.dev',
+  Development = 'development',
   Production = 'production',
 }
 
