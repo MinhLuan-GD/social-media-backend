@@ -65,6 +65,10 @@ services:
       - db
       - store
 
+  toxicity-service:
+    image: akaluan/toxicity:0.0.1
+    container_name: social-media-toxicity-service
+
 volumes:
   db: {}
   store: {}
