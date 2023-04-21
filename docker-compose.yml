@@ -58,7 +58,6 @@ services:
     volumes:
       - .:/app
       - /app/node_modules
-      - /app/dist
     ports:
       - 8000:8000
     depends_on:

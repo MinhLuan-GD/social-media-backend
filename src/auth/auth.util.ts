@@ -5,6 +5,7 @@ import { MyLogger } from '@/logger/logger.service';
 import { Inject, Injectable } from '@nestjs/common';
 import { Services } from '@/utils/constants';
 import { IUsersService } from '@/users/users';
+import { GetAccessTokenResponse } from 'google-auth-library/build/src/auth/oauth2client';
 
 @Injectable()
 export class AuthUtil {
@@ -42,8 +43,15 @@ export class AuthUtil {
   }
 
   async sendVerificationEmail(email: string, name: string, url: string) {
-    const myAccessTokenObject = await this.myOAuth2Client.getAccessToken();
-    const myAccessToken = myAccessTokenObject?.token;
+    let myAccessTokenObject: GetAccessTokenResponse | undefined;
+    try {
+      myAccessTokenObject = await this.myOAuth2Client.getAccessToken();
+    } catch (error) {
+      this.logger.error(error);
+      return;
+    }
+
+    const myAccessToken = myAccessTokenObject.token;
     const mailOptions = {
       from: process.env.EMAIL,
       to: email,
@@ -55,15 +63,19 @@ export class AuthUtil {
         accessToken: myAccessToken,
       },
     };
-    this.mailerService
-      .sendMail(mailOptions)
-      .then((val) => val)
-      .catch((res) => this.logger.error(res));
+    this.mailerService.sendMail(mailOptions);
   }
 
   async sendResetCode(email: string, name: string, code: string) {
-    const myAccessTokenObject = await this.myOAuth2Client.getAccessToken();
-    const myAccessToken = myAccessTokenObject?.token;
+    let myAccessTokenObject: GetAccessTokenResponse | undefined;
+    try {
+      myAccessTokenObject = await this.myOAuth2Client.getAccessToken();
+    } catch (error) {
+      this.logger.error(error);
+      return;
+    }
+
+    const myAccessToken = myAccessTokenObject.token;
     const mailOptions = {
       from: process.env.EMAIL,
       to: email,
@@ -75,10 +87,7 @@ export class AuthUtil {
         accessToken: myAccessToken,
       },
     };
-    this.mailerService
-      .sendMail(mailOptions)
-      .then((val) => val)
-      .catch((res) => this.logger.error(res));
+    this.mailerService.sendMail(mailOptions);
   }
 
   generateCode(length: number) {
