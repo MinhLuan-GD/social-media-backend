@@ -9,7 +9,7 @@ interface Image {
 
 export type PostDocument = Post & Document;
 
-@Schema({ collection: 'posts', timestamps: true })
+@Schema({ collection: 'posts', timestamps: true, versionKey: false })
 export class Post {
   @Prop({ enum: ['profilePicture', 'coverPicture', null], default: null })
   type: string;
@@ -29,6 +29,9 @@ export class Post {
 
   @Prop([CommentSchema])
   comments: Comment[];
+
+  @Prop({ default: false })
+  hidePost: boolean;
 
   @Prop()
   background: string;

@@ -2,7 +2,7 @@ import { Schema, Prop, SchemaFactory } from '@nestjs/mongoose';
 import mongoose from 'mongoose';
 import { User } from './user.schema';
 
-@Schema({ _id: false })
+@Schema({ _id: false, versionKey: false })
 export class Search {
   @Prop({
     type: mongoose.Schema.Types.ObjectId,

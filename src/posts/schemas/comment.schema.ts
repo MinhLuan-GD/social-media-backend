@@ -2,7 +2,7 @@ import { User } from '@/users/schemas/user.schema';
 import { Schema, Prop, SchemaFactory } from '@nestjs/mongoose';
 import mongoose from 'mongoose';
 
-@Schema()
+@Schema({ versionKey: false })
 export class Comment {
   @Prop()
   comment: string;
@@ -19,6 +19,9 @@ export class Comment {
     required: true,
   })
   commentBy: User;
+
+  @Prop({ default: false })
+  hideComment: boolean;
 
   @Prop({ required: true })
   commentAt: Date;

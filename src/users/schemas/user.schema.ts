@@ -7,7 +7,7 @@ import { Search, SearchSchema } from './search.schema';
 
 export type UserDocument = User & Document;
 
-@Schema({ collection: 'users', timestamps: true })
+@Schema({ collection: 'users', timestamps: true, versionKey: false })
 export class User {
   @Prop({ required: true, trim: true })
   first_name: string;

@@ -5,7 +5,7 @@ import { IConNotification } from '../types/iconnotification';
 
 export type NotificationDocument = Notification & Document;
 
-@Schema({ collection: 'notifications', timestamps: true })
+@Schema({ collection: 'notifications', timestamps: true, versionKey: false })
 export class Notification {
   @Prop({
     type: mongoose.Schema.Types.ObjectId,

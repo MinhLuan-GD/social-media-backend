@@ -5,7 +5,7 @@ import mongoose, { Document } from 'mongoose';
 
 export type ReactDocument = React & Document;
 
-@Schema({ collection: 'reacts' })
+@Schema({ collection: 'reacts', versionKey: false })
 export class React {
   @Prop({
     enum: ['like', 'love', 'haha', 'sad', 'angry', 'wow'],
