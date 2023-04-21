@@ -10,6 +10,10 @@ import {
   CreatePostDetails,
   UpdateCommentDetails,
 } from '@/utils/types';
+import {
+  NotificationDocument,
+  Notification,
+} from '@/notifications/schemas/notification.schema';
 
 @Injectable()
 export class PostsService implements IPostsService {
@@ -18,13 +22,60 @@ export class PostsService implements IPostsService {
     private postsModel: Model<PostDocument>,
     @InjectModel(User.name)
     private usersModel: Model<UserDocument>,
+    @InjectModel(Notification.name)
+    private notificationsModel: Model<NotificationDocument>,
   ) {}
 
   async createPost(createPostDetails: CreatePostDetails) {
-    return (await this.postsModel.create(createPostDetails)).populate(
-      'user',
-      'first_name last_name cover picture username',
+    const post = await this.postsModel.create(createPostDetails);
+    this.checkTextToxicity(
+      createPostDetails.text,
+      createPostDetails.user,
+      post._id,
+      null,
     );
+
+    return post.populate('user', 'first_name last_name cover picture username');
+  }
+
+  async checkTextToxicity(
+    text: string,
+    user: string,
+    postId: string,
+    commentId?: string,
+  ) {
+    const toxicitySRes = await fetch(
+      `http://toxicity-service/score-comment/${text}`,
+    );
+    const toxicitySData = await toxicitySRes.json();
+    let toxicText = false;
+    for (const key in toxicitySData) {
+      if (toxicitySData[key] === true) {
+        toxicText = true;
+        break;
+      }
+    }
+
+    if (toxicText) {
+      this.notificationsModel.create({
+        user,
+        icon: 'post',
+        text: `Your ${
+          commentId ? 'comment' : 'post'
+        } has been hidden due to toxicity`,
+      });
+
+      if (!commentId) {
+        await this.postsModel.findByIdAndUpdate(postId, {
+          $set: { hidePost: true },
+        });
+      } else {
+        await this.postsModel.updateOne(
+          { _id: postId, 'comments._id': commentId },
+          { $set: { 'comments.$.hideComment': true } },
+        );
+      }
+    }
   }
 
   async getAllPosts(id: string) {
@@ -80,6 +131,7 @@ export class PostsService implements IPostsService {
       )
       .populate('comments.commentBy', 'picture first_name last_name username')
       .lean();
+    this.checkTextToxicity(comment, commentBy, post, comments.slice(-1)[0]._id);
     return comments;
   }
 

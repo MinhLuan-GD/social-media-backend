@@ -17,7 +17,6 @@ export class Notification {
   @Prop({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
-    required: true,
   })
   from: User;
 

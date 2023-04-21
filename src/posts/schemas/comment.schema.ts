@@ -1,9 +1,11 @@
 import { User } from '@/users/schemas/user.schema';
 import { Schema, Prop, SchemaFactory } from '@nestjs/mongoose';
-import mongoose from 'mongoose';
+import mongoose, { ObjectId } from 'mongoose';
 
 @Schema({ versionKey: false })
 export class Comment {
+  _id: string;
+
   @Prop()
   comment: string;
 
