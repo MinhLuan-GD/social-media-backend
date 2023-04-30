@@ -26,40 +26,16 @@ class EnvironmentVariables {
   FONT_END_URL: string;
 
   @IsString()
-  DB_HOST: string;
-
-  @IsInt()
-  DB_PORT: number;
+  TOXICITY_URL: string;
 
   @IsString()
-  DB_NAME: string;
-
-  @IsString()
-  DB_USERNAME: string;
-
-  @IsString()
-  DB_PASSWORD: string;
-
-  @IsInt()
-  DB_MAX_POOL_SIZE: number;
-
-  @IsInt()
-  DB_MIN_POOL_SIZE: number;
-
-  @IsInt()
-  DB_SOCKET_TIMEOUT: number;
-
-  @IsInt()
-  DB_FAMILY: number;
+  DB_URI: string;
 
   @IsString()
   STORE_HOST: string;
 
   @IsInt()
   STORE_PORT: number;
-
-  @IsString()
-  STORE_PASSWORD: string;
 
   @IsString()
   SECRET_KEY: string;

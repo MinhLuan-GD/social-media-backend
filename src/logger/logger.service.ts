@@ -4,7 +4,7 @@ import { join } from 'path';
 
 @Injectable()
 export class MyLogger extends ConsoleLogger {
-  private logsDir = 'src/logs';
+  private logsDir = join(__dirname, '..', 'logs');
 
   error(message: any) {
     if (!existsSync(this.logsDir)) {

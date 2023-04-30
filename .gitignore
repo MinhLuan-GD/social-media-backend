@@ -39,3 +39,4 @@ lerna-debug.log*
 *.env
 
 docker-compose.override.yml
+secret.yaml

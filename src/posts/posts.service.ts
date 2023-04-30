@@ -14,6 +14,7 @@ import {
   NotificationDocument,
   Notification,
 } from '@/notifications/schemas/notification.schema';
+import fetch from 'node-fetch';
 
 @Injectable()
 export class PostsService implements IPostsService {
@@ -27,55 +28,44 @@ export class PostsService implements IPostsService {
   ) {}
 
   async createPost(createPostDetails: CreatePostDetails) {
-    const post = await this.postsModel.create(createPostDetails);
-    this.checkTextToxicity(
-      createPostDetails.text,
-      createPostDetails.user,
-      post._id,
-      null,
-    );
-
+    let isToxic = false;
+    if (createPostDetails.text) {
+      isToxic = await this.checkTextToxicity(createPostDetails.text);
+    }
+    if (isToxic) {
+      this.notificationsModel.create({
+        user: createPostDetails.user,
+        icon: 'system',
+        text: 'Your post has been hidden due to toxicity.',
+        isSystem: true,
+      });
+    }
+    const post = await this.postsModel.create({
+      ...createPostDetails,
+      hidePost: isToxic,
+    });
     return post.populate('user', 'first_name last_name cover picture username');
   }
 
-  async checkTextToxicity(
-    text: string,
-    user: string,
-    postId: string,
-    commentId?: string,
-  ) {
-    const toxicitySRes = await fetch(
-      `http://toxicity-service/score-comment/${text}`,
-    );
+  async checkTextToxicity(text: string) {
+    let toxicitySRes: any;
+    try {
+      toxicitySRes = await fetch(process.env.TOXICITY_URL, {
+        method: 'POST',
+        body: JSON.stringify({ text }),
+        headers: { 'Content-Type': 'application/json' },
+      });
+    } catch (error) {
+      console.log(error);
+      return;
+    }
     const toxicitySData = await toxicitySRes.json();
-    let toxicText = false;
     for (const key in toxicitySData) {
       if (toxicitySData[key] === true) {
-        toxicText = true;
-        break;
+        return true;
       }
     }
-
-    if (toxicText) {
-      this.notificationsModel.create({
-        user,
-        icon: 'post',
-        text: `Your ${
-          commentId ? 'comment' : 'post'
-        } has been hidden due to toxicity`,
-      });
-
-      if (!commentId) {
-        await this.postsModel.findByIdAndUpdate(postId, {
-          $set: { hidePost: true },
-        });
-      } else {
-        await this.postsModel.updateOne(
-          { _id: postId, 'comments._id': commentId },
-          { $set: { 'comments.$.hideComment': true } },
-        );
-      }
-    }
+    return false;
   }
 
   async getAllPosts(id: string) {
@@ -113,6 +103,19 @@ export class PostsService implements IPostsService {
     createCommentDetails: CreateCommentDetails,
   ) {
     const { comment, image, postId: post, parentId } = createCommentDetails;
+    let isToxic = false;
+    let notification = {};
+    if (comment) {
+      isToxic = await this.checkTextToxicity(comment);
+    }
+    if (isToxic) {
+      notification = await this.notificationsModel.create({
+        user: commentBy,
+        icon: 'system',
+        text: 'Your comment has been hidden due to toxicity',
+        isSystem: true,
+      });
+    }
     const { comments } = await this.postsModel
       .findByIdAndUpdate(
         post,
@@ -123,6 +126,7 @@ export class PostsService implements IPostsService {
               comment,
               parentId,
               commentBy,
+              hideComment: isToxic,
               commentAt: new Date(),
             },
           },
@@ -131,8 +135,10 @@ export class PostsService implements IPostsService {
       )
       .populate('comments.commentBy', 'picture first_name last_name username')
       .lean();
-    this.checkTextToxicity(comment, commentBy, post, comments.slice(-1)[0]._id);
-    return comments;
+    return {
+      comments,
+      notification,
+    };
   }
 
   async updateComment(

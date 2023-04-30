@@ -26,6 +26,9 @@ export class Notification {
   @Prop({ required: true })
   text: string;
 
+  @Prop({ default: false })
+  isSystem: boolean;
+
   @Prop({ default: 'unseen', enum: ['unseen', 'seen'] })
   status: string;
 

@@ -6,14 +6,14 @@ import {
 import { Post } from './schemas/post.schema';
 
 export interface IPostsService {
-  createPost(createPostDetails: CreatePostDetails): Promise<Post>;
+  createPost(createPostDetails: CreatePostDetails): Promise<any>;
 
   getAllPosts(id: string): Promise<Post[]>;
 
   createComment(
     commentBy: string,
     createCommentDetails: CreateCommentDetails,
-  ): Promise<any[]>;
+  ): Promise<any>;
 
   updateComment(
     commentBy: string,

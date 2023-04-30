@@ -8,4 +8,5 @@ export enum IConNotification {
   FRIEND = 'friend',
   COMMENT = 'comment',
   POST = 'post',
+  SYSTEM = 'system',
 }

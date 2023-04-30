@@ -1,6 +1,6 @@
 import { User } from '@/users/schemas/user.schema';
 import { Schema, Prop, SchemaFactory } from '@nestjs/mongoose';
-import mongoose, { ObjectId } from 'mongoose';
+import mongoose from 'mongoose';
 
 @Schema({ versionKey: false })
 export class Comment {

@@ -1,0 +1,153 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: social-media-prod-db-deployment
+spec:
+  selector:
+    matchLabels:
+      app: db
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: db
+    spec:
+      containers:
+        - name: db
+          image: mongo:latest
+          volumeMounts:
+            - name: db
+              mountPath: /data/db
+          ports:
+            - name: mongodb
+              containerPort: 27017
+      volumes:
+        - name: db
+          emptyDir: {}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: social-media-prod-store-deployment
+spec:
+  selector:
+    matchLabels:
+      app: store
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: store
+    spec:
+      containers:
+        - name: store
+          image: redis:latest
+          command:
+            ['redis-server', '--save', '60', '1', '--loglevel', 'warning']
+          volumeMounts:
+            - name: store
+              mountPath: /data
+          ports:
+            - containerPort: 6379
+      volumes:
+        - name: store
+          emptyDir: {}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: social-media-prod-api-deployment
+spec:
+  selector:
+    matchLabels:
+      app: api
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: api
+    spec:
+      containers:
+        - name: api
+          image: akaluan/sm-api
+          env:
+            - name: PORT
+              value: '80'
+          envFrom:
+            - configMapRef:
+                name: social-media-prod-config
+          ports:
+            - containerPort: 80
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: social-media-prod-toxicity-deployment
+spec:
+  selector:
+    matchLabels:
+      app: toxicity
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: toxicity
+    spec:
+      containers:
+        - name: toxicity
+          image: akaluan/toxicity:0.0.3
+          ports:
+            - containerPort: 80
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: social-media-prod-db-service
+spec:
+  selector:
+    app: db
+  ports:
+    - name: mongodb
+      port: 27017
+      targetPort: 27017
+  type: ClusterIP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: social-media-prod-store-service
+spec:
+  selector:
+    app: store
+  ports:
+    - name: redis
+      port: 6379
+      targetPort: 6379
+  type: ClusterIP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: social-media-prod-api-service
+spec:
+  selector:
+    app: api
+  ports:
+    - name: api
+      port: 80
+      targetPort: 80
+      nodePort: 30007
+  type: NodePort
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: social-media-prod-toxicity-service
+spec:
+  selector:
+    app: toxicity
+  ports:
+    - name: toxicity
+      port: 80
+      targetPort: 80
+  type: ClusterIP
