@@ -36,7 +36,7 @@ export class PostsService implements IPostsService {
       this.notificationsModel.create({
         user: createPostDetails.user,
         icon: 'system',
-        text: 'Your post has been hidden due to toxicity.',
+        text: 'Your post has been locked for violating our community standards with inappropriate language that could incite hatred.',
         isSystem: true,
       });
     }
@@ -112,7 +112,7 @@ export class PostsService implements IPostsService {
       notification = await this.notificationsModel.create({
         user: commentBy,
         icon: 'system',
-        text: 'Your comment has been hidden due to toxicity',
+        text: 'Your comment has been locked for violating our community standards with inappropriate language that could incite hatred.',
         isSystem: true,
       });
     }
@@ -182,7 +182,7 @@ export class PostsService implements IPostsService {
     findPost.comments.forEach((x: Comment & { _id: any }) => {
       if (x.parentId == _id) {
         findPost.comments.forEach((y: Comment & { _id: any }) => {
-          if (y.parentId == x.parentId) {
+          if (y.parentId == x._id) {
             commentIds.push(y._id);
           }
           commentIds.push(x._id);

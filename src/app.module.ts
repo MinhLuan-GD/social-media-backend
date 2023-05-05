@@ -13,6 +13,7 @@ import { PostsModule } from './posts/posts.module';
 import { ReactsModule } from './reacts/reacts.module';
 import { UploadsModule } from './uploads/uploads.module';
 import { UsersModule } from './users/users.module';
+import { EventsModule } from './gateway/events.module';
 
 @Module({
   imports: [
@@ -28,6 +29,7 @@ import { UsersModule } from './users/users.module';
     UploadsModule,
     ChatModule,
     NotificationsModule,
+    EventsModule,
   ],
   controllers: [],
   providers: [],
