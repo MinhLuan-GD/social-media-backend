@@ -9,6 +9,7 @@ import {
   Notification,
   NotificationSchema,
 } from '@/notifications/schemas/notification.schema';
+import { EventsModule } from '@/gateway/events.module';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import {
       { name: User.name, schema: UserSchema },
       { name: Notification.name, schema: NotificationSchema },
     ]),
+    EventsModule,
   ],
   providers: [
     {

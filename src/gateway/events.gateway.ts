@@ -9,7 +9,7 @@ import { Server, Socket } from 'socket.io';
 
 @WebSocketGateway({
   cors: {
-    origin: 'http://localhost:3000',
+    origin: process.env.ORIGIN,
     methods: ['GET', 'POST'],
     credentials: true,
   },
@@ -25,7 +25,6 @@ export class EventsGateway {
   addUser(userId, socketId, userName, picture, timeJoin) {
     !this.users.some((user) => user.userId === userId) &&
       this.users.push({ userId, socketId, userName, picture, timeJoin });
-    console.log(this.users);
   }
 
   getUser(userId) {
@@ -34,7 +33,6 @@ export class EventsGateway {
 
   removeUser(socketId) {
     this.users = this.users.filter((user) => user.socketId !== socketId);
-    console.log(this.users);
   }
 
   handleConnection(client: Socket) {
@@ -107,6 +105,10 @@ export class EventsGateway {
   handleDisconnect(client: Socket) {
     this.removeUser(client.id);
     this.server.emit('getUsers', this.users);
-    console.log(this.users);
+  }
+
+  @SubscribeMessage('joinUser')
+  joinUser(client: Socket, userId: string) {
+    client.join(`users:${userId}`);
   }
 }

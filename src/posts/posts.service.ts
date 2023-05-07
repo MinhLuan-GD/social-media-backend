@@ -1,5 +1,5 @@
 import { User, UserDocument } from '@/users/schemas/user.schema';
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Post, PostDocument } from './schemas/post.schema';
@@ -15,6 +15,9 @@ import {
   Notification,
 } from '@/notifications/schemas/notification.schema';
 import fetch from 'node-fetch';
+import { WebSocketServer } from '@nestjs/websockets';
+import { Server } from 'socket.io';
+import { EventsGateway } from '@/gateway/events.gateway';
 
 @Injectable()
 export class PostsService implements IPostsService {
@@ -25,6 +28,8 @@ export class PostsService implements IPostsService {
     private usersModel: Model<UserDocument>,
     @InjectModel(Notification.name)
     private notificationsModel: Model<NotificationDocument>,
+    @Inject(EventsGateway)
+    private readonly evenGateWay: EventsGateway,
   ) {}
 
   async createPost(createPostDetails: CreatePostDetails) {
@@ -33,12 +38,17 @@ export class PostsService implements IPostsService {
       isToxic = await this.checkTextToxicity(createPostDetails.text);
     }
     if (isToxic) {
-      this.notificationsModel.create({
+      const server: Server = this.evenGateWay.server;
+
+      const notification = await this.notificationsModel.create({
         user: createPostDetails.user,
         icon: 'system',
         text: 'Your post has been locked for violating our community standards with inappropriate language that could incite hatred.',
         isSystem: true,
       });
+      server
+        .to(`users:${createPostDetails.user}`)
+        .emit('toxicNotification', notification);
     }
     const post = await this.postsModel.create({
       ...createPostDetails,
