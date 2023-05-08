@@ -15,6 +15,9 @@ export class Comment {
   @Prop({ default: '' })
   parentId: string;
 
+  @Prop({ default: false })
+  isFetching: boolean;
+
   @Prop({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
