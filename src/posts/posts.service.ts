@@ -168,6 +168,22 @@ export class PostsService implements IPostsService {
       throw new HttpException('cant find comment', HttpStatus.CONFLICT);
     }
 
+    let isToxic = false;
+    let notification = {};
+    if (comment) {
+      isToxic = await this.checkTextToxicity(comment);
+    }
+    if (isToxic) {
+      const server: Server = this.evenGateWay.server;
+      notification = await this.notificationsModel.create({
+        user: commentBy,
+        icon: 'system',
+        text: 'Your comment has been locked for violating our community standards with inappropriate language that could incite hatred.',
+        isSystem: true,
+      });
+      server.to(`users:${commentBy}`).emit('toxicNotification', notification);
+    }
+
     const { comments } = await this.postsModel
       .findOneAndUpdate(
         { _id: post, comments: { $elemMatch: { _id, commentBy } } },
@@ -176,6 +192,7 @@ export class PostsService implements IPostsService {
             'comments.$.comment': comment,
             'comments.$.image': image,
             'comments.$.updateAt': new Date(),
+            'comments.$.hideComment': isToxic,
           },
         },
         { new: true },
