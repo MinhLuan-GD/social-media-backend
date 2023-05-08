@@ -6,6 +6,16 @@ import {
   WebSocketServer,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
+import {
+  AddUserPayload,
+  MessageDeliveredPayload,
+  MessageSeenAllPayload,
+  MessageSeenPayload,
+  SendMessagePayload,
+  StartTypingMessagePayload,
+  StopTypingMessagePayload,
+} from './interfaces/payload';
+import { IUser } from './interfaces/user';
 
 @WebSocketGateway({
   cors: {
@@ -16,90 +26,33 @@ import { Server, Socket } from 'socket.io';
 })
 export class EventsGateway {
   @WebSocketServer() server: Server;
-  users = [];
+  users: IUser[] = [];
   broadcastEventTypes = {
     ACTIVE_USERS: 'ACTIVE_USERS',
     GROUP_CALL_ROOMS: 'GROUP_CALL_ROOMS',
   };
 
-  addUser(userId, socketId, userName, picture, timeJoin) {
+  addUser(
+    userId: string,
+    socketId: string,
+    userName: string,
+    picture: string,
+    timeJoin: string,
+  ) {
     !this.users.some((user) => user.userId === userId) &&
       this.users.push({ userId, socketId, userName, picture, timeJoin });
   }
 
-  getUser(userId) {
+  getUser(userId: string) {
     return this.users.find((user) => user.userId === userId);
   }
 
-  removeUser(socketId) {
+  removeUser(socketId: string) {
     this.users = this.users.filter((user) => user.socketId !== socketId);
   }
 
   handleConnection(client: Socket) {
-    client.on('addUser', (data) => {
-      this.addUser(
-        data.userId,
-        client.id,
-        data.userName,
-        data.picture,
-        data.timeJoin,
-      );
-
-      this.server.emit('getUsers', this.users);
-
-      this.server.emit('broadcast', {
-        event: this.broadcastEventTypes.ACTIVE_USERS,
-        activeUsers: this.users,
-      });
-    });
-
-    client.on('sendMessage', ({ messages, currentChatID }) => {
-      const user = this.getUser(messages?.receiver);
-      this.server
-        .to(user?.socketId)
-        .emit('getMessage', { messages, currentChatID });
-    });
-
-    client.on('messageDelivered', (data) => {
-      const user = this.getUser(data.message?.sender);
-      this.server.to(user?.socketId).emit('getMessageDelivered', data);
-    });
-
-    client.on('messageSeen', (data) => {
-      const user = this.getUser(data.message?.sender);
-      this.server.to(user?.socketId).emit('getMessageSeen', data);
-    });
-
-    client.on('messageSeenAll', (data) => {
-      const user = this.getUser(data.receiverId);
-      this.server.to(user?.socketId).emit('getMessageSeenAll', data);
-    });
-
-    client.on('start typing message', (data) => {
-      console.log('start typing message', data);
-      const user = this.getUser(data.receiverId);
-      this.server.to(user?.socketId).emit('start typing message', data);
-    });
-
-    client.on('stop typing message', (data) => {
-      const user = this.getUser(data.receiverId);
-      this.server.to(user?.socketId).emit('stop typing message', data);
-    });
-
-    client.on('sendNotification', (data) => {
-      const user = this.getUser(data.receiverId);
-      this.server.to(user?.socketId).emit('getNotification', data);
-    });
-
-    client.on('call-other', (data) => {
-      const user = this.getUser(data.receiveId);
-      this.server.to(user?.socketId).emit('call-other', {
-        callerUserId: data.senderId,
-        callerUsername: data.username,
-        callerPicture: data.picture,
-        roomId: data.roomId,
-      });
-    });
+    console.log(`Client id: ${client.id} has connected.`);
   }
 
   handleDisconnect(client: Socket) {
@@ -107,8 +60,90 @@ export class EventsGateway {
     this.server.emit('getUsers', this.users);
   }
 
+  @SubscribeMessage('call-other')
+  callOther(_client: Socket, data: any) {
+    console.log('\n---\n callOther:\n');
+    console.log(data);
+    const user = this.getUser(data.receiveId);
+    this.server.to(user?.socketId).emit('call-other', {
+      callerUserId: data.senderId,
+      callerUsername: data.username,
+      callerPicture: data.picture,
+      roomId: data.roomId,
+    });
+  }
+
+  @SubscribeMessage('sendNotification')
+  sendNotification(_client: Socket, data: any) {
+    const user = this.getUser(data.receiverId);
+    this.server.to(user?.socketId).emit('getNotification', data);
+  }
+
+  @SubscribeMessage('stop typing message')
+  stopTypingMessage(_client: Socket, payload: StopTypingMessagePayload) {
+    const user = this.getUser(payload.receiverId);
+    this.server.to(user?.socketId).emit('stop typing message', payload);
+  }
+
+  @SubscribeMessage('start typing message')
+  startTypingMessage(_client: Socket, payload: StartTypingMessagePayload) {
+    const user = this.getUser(payload.receiverId);
+    this.server.to(user?.socketId).emit('start typing message', payload);
+  }
+
+  @SubscribeMessage('messageSeenAll')
+  messageSeenAll(_client: Socket, data: any) {
+    console.log('\n---\n messageSeenAll:\n');
+    console.log(data);
+    const user = this.getUser(data.receiverId);
+    this.server.to(user?.socketId).emit('getMessageSeenAll', data);
+  }
+
+  @SubscribeMessage('messageSeen')
+  messageSeen(_client: Socket, payload: MessageSeenPayload) {
+    const user = this.getUser(payload.message?.sender);
+    this.server.to(user?.socketId).emit('getMessageSeen', payload);
+  }
+
+  @SubscribeMessage('messageDelivered')
+  messageDelivered(_client: Socket, payload: MessageDeliveredPayload) {
+    const user = this.getUser(payload.message?.sender);
+    this.server.to(user?.socketId).emit('getMessageDelivered', payload);
+  }
+
+  @SubscribeMessage('sendMessage')
+  sendMessage(_client: Socket, payload: SendMessagePayload) {
+    const user = this.getUser(payload.messages?.receiver);
+    this.server.to(user?.socketId).emit('getMessage', payload);
+  }
+
+  @SubscribeMessage('addUser')
+  handleAddUser(client: Socket, payload: AddUserPayload) {
+    if (payload.userId) {
+      this.addUser(
+        payload.userId,
+        client.id,
+        payload.userName,
+        payload.picture,
+        payload.timeJoin,
+      );
+    }
+
+    this.server.emit('getUsers', this.users);
+
+    this.server.emit('broadcast', {
+      event: this.broadcastEventTypes.ACTIVE_USERS,
+      activeUsers: this.users,
+    });
+  }
+
   @SubscribeMessage('joinUser')
   joinUser(client: Socket, userId: string) {
     client.join(`users:${userId}`);
+  }
+
+  @SubscribeMessage('leaveUser')
+  leaveUser(client: Socket, userId: string) {
+    client.leave(`users:${userId}`);
   }
 }
