@@ -11,7 +11,10 @@ export type PostDocument = Post & Document;
 
 @Schema({ collection: 'posts', timestamps: true, versionKey: false })
 export class Post {
-  @Prop({ enum: ['profilePicture', 'coverPicture', null], default: null })
+  @Prop({
+    enum: ['profilePicture', 'coverPicture', 'picture', null],
+    default: null,
+  })
   type: string;
 
   @Prop()

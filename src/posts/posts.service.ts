@@ -50,6 +50,9 @@ export class PostsService implements IPostsService {
         .to(`users:${createPostDetails.user}`)
         .emit('toxicNotification', notification);
     }
+    if (!createPostDetails.type && !createPostDetails.text) {
+      createPostDetails.type = 'picture';
+    }
     const post = await this.postsModel.create({
       ...createPostDetails,
       hidePost: isToxic,
@@ -119,12 +122,14 @@ export class PostsService implements IPostsService {
       isToxic = await this.checkTextToxicity(comment);
     }
     if (isToxic) {
+      const server: Server = this.evenGateWay.server;
       notification = await this.notificationsModel.create({
         user: commentBy,
         icon: 'system',
         text: 'Your comment has been locked for violating our community standards with inappropriate language that could incite hatred.',
         isSystem: true,
       });
+      server.to(`users:${commentBy}`).emit('toxicNotification', notification);
     }
     const { comments } = await this.postsModel
       .findByIdAndUpdate(
