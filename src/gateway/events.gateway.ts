@@ -1,6 +1,4 @@
 import {
-  ConnectedSocket,
-  MessageBody,
   SubscribeMessage,
   WebSocketGateway,
   WebSocketServer,
@@ -12,6 +10,7 @@ import {
   MessageSeenAllPayload,
   MessageSeenPayload,
   SendMessagePayload,
+  SendNotificationPayload,
   StartTypingMessagePayload,
   StopTypingMessagePayload,
 } from './interfaces/payload';
@@ -62,8 +61,6 @@ export class EventsGateway {
 
   @SubscribeMessage('call-other')
   callOther(_client: Socket, data: any) {
-    console.log('\n---\n callOther:\n');
-    console.log(data);
     const user = this.getUser(data.receiveId);
     this.server.to(user?.socketId).emit('call-other', {
       callerUserId: data.senderId,
@@ -74,7 +71,7 @@ export class EventsGateway {
   }
 
   @SubscribeMessage('sendNotification')
-  sendNotification(_client: Socket, data: any) {
+  sendNotification(_client: Socket, data: SendNotificationPayload) {
     const user = this.getUser(data.receiverId);
     this.server.to(user?.socketId).emit('getNotification', data);
   }
@@ -92,9 +89,7 @@ export class EventsGateway {
   }
 
   @SubscribeMessage('messageSeenAll')
-  messageSeenAll(_client: Socket, data: any) {
-    console.log('\n---\n messageSeenAll:\n');
-    console.log(data);
+  messageSeenAll(_client: Socket, data: MessageSeenAllPayload) {
     const user = this.getUser(data.receiverId);
     this.server.to(user?.socketId).emit('getMessageSeenAll', data);
   }

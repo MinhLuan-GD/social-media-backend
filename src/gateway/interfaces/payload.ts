@@ -24,8 +24,7 @@ interface StartTypingMessagePayload {
 }
 
 interface MessageSeenAllPayload {
-  message: Message;
-  currentChatId: string;
+  receiverId: string;
 }
 
 interface Message {
