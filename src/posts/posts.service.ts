@@ -15,7 +15,6 @@ import {
   Notification,
 } from '@/notifications/schemas/notification.schema';
 import fetch from 'node-fetch';
-import { WebSocketServer } from '@nestjs/websockets';
 import { Server } from 'socket.io';
 import { EventsGateway } from '@/gateway/events.gateway';
 
@@ -57,7 +56,10 @@ export class PostsService implements IPostsService {
       ...createPostDetails,
       hidePost: isToxic,
     });
-    return post.populate('user', 'first_name last_name cover picture username');
+    return post.populate(
+      'user',
+      'first_name last_name cover picture username gender',
+    );
   }
 
   async checkTextToxicity(text: string) {
