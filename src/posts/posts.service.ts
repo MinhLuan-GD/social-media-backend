@@ -36,9 +36,15 @@ export class PostsService implements IPostsService {
     if (createPostDetails.text) {
       isToxic = await this.checkTextToxicity(createPostDetails.text);
     }
+    if (!createPostDetails.type && !createPostDetails.text) {
+      createPostDetails.type = 'picture';
+    }
+    const post = await this.postsModel.create({
+      ...createPostDetails,
+      hidePost: isToxic,
+    });
+    const server: Server = this.evenGateWay.server;
     if (isToxic) {
-      const server: Server = this.evenGateWay.server;
-
       const notification = await this.notificationsModel.create({
         user: createPostDetails.user,
         icon: 'system',
@@ -48,14 +54,35 @@ export class PostsService implements IPostsService {
       server
         .to(`users:${createPostDetails.user}`)
         .emit('toxicNotification', notification);
+    } else {
+      const user = await this.usersModel.findById(createPostDetails.user);
+      for (const friend of user.friends) {
+        const notification = await this.notificationsModel.create({
+          user: friend,
+          icon: 'post',
+          text: `${user.first_name} ${user.last_name} has posted something.`,
+        });
+        const notificationPayload = {
+          _id: notification._id,
+          user: friend,
+          from: {
+            _id: user._id,
+            first_name: user.first_name,
+            last_name: user.last_name,
+            picture: user.picture,
+          },
+          icon: 'post',
+          text: notification.text,
+          createdAt: notification.createdAt,
+          updatedAt: notification.updatedAt,
+        };
+        server.to(`users:${friend}`).emit('newPost', post);
+        server
+          .to(`users:${friend}`)
+          .emit('postNotification', notificationPayload);
+      }
     }
-    if (!createPostDetails.type && !createPostDetails.text) {
-      createPostDetails.type = 'picture';
-    }
-    const post = await this.postsModel.create({
-      ...createPostDetails,
-      hidePost: isToxic,
-    });
+
     return post.populate(
       'user',
       'first_name last_name cover picture username gender',
@@ -117,25 +144,15 @@ export class PostsService implements IPostsService {
     commentBy: string,
     createCommentDetails: CreateCommentDetails,
   ) {
-    const { comment, image, postId: post, parentId } = createCommentDetails;
+    const { comment, image, postId, parentId } = createCommentDetails;
     let isToxic = false;
-    let notification = {};
+    let notification: any = {};
     if (comment) {
       isToxic = await this.checkTextToxicity(comment);
     }
-    if (isToxic) {
-      const server: Server = this.evenGateWay.server;
-      notification = await this.notificationsModel.create({
-        user: commentBy,
-        icon: 'system',
-        text: 'Your comment has been locked for violating our community standards with inappropriate language that could incite hatred.',
-        isSystem: true,
-      });
-      server.to(`users:${commentBy}`).emit('toxicNotification', notification);
-    }
     const { comments } = await this.postsModel
       .findByIdAndUpdate(
-        post,
+        postId,
         {
           $push: {
             comments: {
@@ -152,6 +169,48 @@ export class PostsService implements IPostsService {
       )
       .populate('comments.commentBy', 'picture first_name last_name username')
       .lean();
+    const server: Server = this.evenGateWay.server;
+    const post: any = await this.postsModel.findById(postId).populate('user');
+    const user = await this.usersModel.findById(commentBy);
+    if (isToxic) {
+      notification = await this.notificationsModel.create({
+        user: commentBy,
+        icon: 'system',
+        text: 'Your comment has been locked for violating our community standards with inappropriate language that could incite hatred.',
+        isSystem: true,
+      });
+      server.to(`users:${commentBy}`).emit('toxicNotification', notification);
+    } else if (post && post.user._id.toString() !== commentBy) {
+      notification = await this.notificationsModel.create({
+        user: post.user._id,
+        from: commentBy,
+        icon: 'comment',
+        text: `${user.first_name} ${user.last_name} commented on your post`,
+      });
+      const notificationPayload = {
+        _id: notification._id,
+        user: post.user._id,
+        from: {
+          _id: user._id,
+          first_name: user.first_name,
+          last_name: user.last_name,
+          picture: user.picture,
+        },
+        icon: 'comment',
+        text: notification.text,
+        createdAt: notification.createdAt,
+        updatedAt: notification.updatedAt,
+      };
+      server
+        .to(`users:${post.user._id}`)
+        .emit('commentNotification', notificationPayload);
+
+      server.emit('newComment', {
+        postId,
+        comment: comments[comments.length - 1],
+      });
+    }
+
     return {
       comments,
       notification,

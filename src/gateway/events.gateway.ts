@@ -141,4 +141,26 @@ export class EventsGateway {
   leaveUser(client: Socket, userId: string) {
     client.leave(`users:${userId}`);
   }
+
+  @SubscribeMessage('joinPostCommentTyping')
+  async joinPostTyping(client: Socket, postId: string) {
+    const sockets = await this.server
+      .in(`posts:${postId}:commentTyping`)
+      .fetchSockets();
+    if (sockets.length === 0) {
+      this.server.emit('startPostCommentTyping', postId);
+    }
+    client.join(`posts:${postId}:commentTyping`);
+  }
+
+  @SubscribeMessage('leavePostCommentTyping')
+  async leavePostTyping(client: Socket, postId: string) {
+    client.leave(`posts:${postId}:commentTyping`);
+    const sockets = await this.server
+      .in(`posts:${postId}:commentTyping`)
+      .fetchSockets();
+    if (sockets.length === 0) {
+      this.server.emit('stopPostCommentTyping', postId);
+    }
+  }
 }
