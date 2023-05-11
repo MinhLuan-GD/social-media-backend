@@ -54,39 +54,40 @@ export class PostsService implements IPostsService {
       server
         .to(`users:${createPostDetails.user}`)
         .emit('toxicNotification', notification);
-    } else {
-      const user = await this.usersModel.findById(createPostDetails.user);
-      for (const friend of user.friends) {
-        const notification = await this.notificationsModel.create({
-          user: friend,
-          icon: 'post',
-          text: `${user.first_name} ${user.last_name} has posted something.`,
-        });
-        const notificationPayload = {
-          _id: notification._id,
-          user: friend,
-          from: {
-            _id: user._id,
-            first_name: user.first_name,
-            last_name: user.last_name,
-            picture: user.picture,
-          },
-          icon: 'post',
-          text: notification.text,
-          createdAt: notification.createdAt,
-          updatedAt: notification.updatedAt,
-        };
-        server.to(`users:${friend}`).emit('newPost', post);
-        server
-          .to(`users:${friend}`)
-          .emit('postNotification', notificationPayload);
-      }
     }
-
-    return post.populate(
+    const user = await this.usersModel.findById(createPostDetails.user);
+    const postRs = await post.populate(
       'user',
       'first_name last_name cover picture username gender',
     );
+
+    for (const friend of user.friends) {
+      const notification = await this.notificationsModel.create({
+        user: friend,
+        icon: 'post',
+        text: `${user.first_name} ${user.last_name} has posted something.`,
+      });
+      const notificationPayload = {
+        _id: notification._id,
+        user: friend,
+        from: {
+          _id: user._id,
+          first_name: user.first_name,
+          last_name: user.last_name,
+          picture: user.picture,
+        },
+        icon: 'post',
+        text: notification.text,
+        createdAt: notification.createdAt,
+        updatedAt: notification.updatedAt,
+      };
+      server.to(`users:${friend}`).emit('newPost', postRs);
+      server
+        .to(`users:${friend}`)
+        .emit('postNotification', notificationPayload);
+    }
+
+    return postRs;
   }
 
   async checkTextToxicity(text: string) {
@@ -180,7 +181,8 @@ export class PostsService implements IPostsService {
         isSystem: true,
       });
       server.to(`users:${commentBy}`).emit('toxicNotification', notification);
-    } else if (post && post.user._id.toString() !== commentBy) {
+    }
+    if (post && post.user._id.toString() !== commentBy) {
       notification = await this.notificationsModel.create({
         user: post.user._id,
         from: commentBy,
