@@ -10,6 +10,8 @@ export class CreatePostDto {
 
   text: string;
 
+  whoCanSee: string;
+
   images: CreateImageDto[];
 
   @IsString()

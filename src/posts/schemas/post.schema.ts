@@ -12,7 +12,7 @@ export type PostDocument = Post & Document;
 @Schema({ collection: 'posts', timestamps: true, versionKey: false })
 export class Post {
   @Prop({
-    enum: ['profilePicture', 'coverPicture', 'picture', null],
+    enum: ['profilePicture', 'coverPicture', 'picture', 'share', null],
     default: null,
   })
   type: string;
@@ -36,13 +36,19 @@ export class Post {
   @Prop({ default: false })
   hidePost: boolean;
 
+  @Prop({
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Post',
+  })
+  postRef: Post;
+
+  @Prop({ enum: ['public', 'private', 'friends'], default: 'public' })
+  whoCanSee: string;
+
   @Prop()
   background: string;
 
-  @Prop()
   createdAt: Date;
-
-  @Prop()
   updatedAt: Date;
 }
 

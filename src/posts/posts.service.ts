@@ -116,29 +116,68 @@ export class PostsService implements IPostsService {
       .findById(id)
       .select('following');
     const following = followingTemp.following;
-    const promises = following.map((user) =>
+
+    const friendTemp = await this.usersModel.findById(id).select('friends');
+    const friends = friendTemp.friends;
+
+    const promisesFollowing = following.map((user) =>
       this.postsModel
-        .find({ user: user })
+        .find({ user, whoCanSee: 'public' })
         .populate('user', 'first_name last_name picture username cover gender')
         .populate('comments.commentBy', 'first_name last_name picture username')
+        .populate({
+          path: 'postRef',
+          populate: {
+            path: 'user',
+            select: 'first_name last_name picture username cover',
+          },
+          select: '-comments',
+        })
         .sort({ createdAt: -1 })
         .limit(5),
     );
 
-    const followingPosts = (await Promise.all(promises)).flat();
-    // const userPosts = await this.postsModel
-    //   .find({ user: id })
-    //   .populate('user', 'first_name last_name picture username cover gender')
-    //   .populate('comments.commentBy', 'first_name last_name picture username')
-    //   .sort({ createdAt: -1 })
-    //   .limit(5);
+    const promisesFriend = friends.map((user) =>
+      this.postsModel
+        .find({ user, whoCanSee: 'friends' })
+        .populate('user', 'first_name last_name picture username cover gender')
+        .populate('comments.commentBy', 'first_name last_name picture username')
+        .populate({
+          path: 'postRef',
+          populate: {
+            path: 'user',
+            select: 'first_name last_name picture username cover',
+          },
+          select: '-comments',
+        })
+        .sort({ createdAt: -1 })
+        .limit(5),
+    );
 
-    // followingPosts.push(...[...userPosts]);
-    followingPosts.sort((a, b) => {
+    const followingPosts = (await Promise.all(promisesFollowing)).flat();
+    const friendPosts = (await Promise.all(promisesFriend)).flat();
+    const userPosts = await this.postsModel
+      .find({ user: id, type: 'share' })
+      .populate('user', 'first_name last_name picture username cover gender')
+      .populate('comments.commentBy', 'first_name last_name picture username')
+      .populate({
+        path: 'postRef',
+        populate: {
+          path: 'user',
+          select: 'first_name last_name picture username cover',
+        },
+        select: '-comments',
+      })
+      .sort({ createdAt: -1 })
+      .limit(5);
+
+    const posts = [...followingPosts, ...friendPosts, ...userPosts];
+
+    posts.sort((a, b) => {
       return b.createdAt.getTime() - a.createdAt.getTime();
     });
 
-    return followingPosts;
+    return posts;
   }
 
   async createComment(
@@ -171,7 +210,9 @@ export class PostsService implements IPostsService {
       .populate('comments.commentBy', 'picture first_name last_name username')
       .lean();
     const server: Server = this.evenGateWay.server;
-    const post: any = await this.postsModel.findById(postId).populate('user');
+    const post: any = await this.postsModel
+      .findById(postId)
+      .populate('user', '_id');
     const user = await this.usersModel.findById(commentBy);
     if (isToxic) {
       notification = await this.notificationsModel.create({
@@ -183,14 +224,14 @@ export class PostsService implements IPostsService {
       server.to(`users:${commentBy}`).emit('toxicNotification', notification);
     }
     if (post && post.user._id.toString() !== commentBy) {
-      notification = await this.notificationsModel.create({
+      const commentNotification = await this.notificationsModel.create({
         user: post.user._id,
         from: commentBy,
         icon: 'comment',
         text: `${user.first_name} ${user.last_name} commented on your post`,
       });
       const notificationPayload = {
-        _id: notification._id,
+        _id: commentNotification._id,
         user: post.user._id,
         from: {
           _id: user._id,
@@ -199,9 +240,9 @@ export class PostsService implements IPostsService {
           picture: user.picture,
         },
         icon: 'comment',
-        text: notification.text,
-        createdAt: notification.createdAt,
-        updatedAt: notification.updatedAt,
+        text: commentNotification.text,
+        createdAt: commentNotification.createdAt,
+        updatedAt: commentNotification.updatedAt,
       };
       server
         .to(`users:${post.user._id}`)

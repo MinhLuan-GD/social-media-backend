@@ -5,6 +5,8 @@ export class UpdateCommentDto {
 
   parentId: string;
 
+  whoCanSee: string;
+
   comment: string;
 
   image: string;
