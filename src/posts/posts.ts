@@ -8,6 +8,8 @@ import { Post } from './schemas/post.schema';
 export interface IPostsService {
   createPost(createPostDetails: CreatePostDetails): Promise<any>;
 
+  getPostById(id: string): Promise<Post>;
+
   getAllPosts(id: string): Promise<Post[]>;
 
   createComment(

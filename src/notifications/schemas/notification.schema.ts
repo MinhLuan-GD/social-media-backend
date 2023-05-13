@@ -32,6 +32,12 @@ export class Notification {
   @Prop({ default: 'unseen', enum: ['unseen', 'seen'] })
   status: string;
 
+  @Prop()
+  postId: string;
+
+  @Prop()
+  commentId: string;
+
   createdAt: Date;
   updatedAt: Date;
 }

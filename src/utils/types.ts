@@ -61,6 +61,7 @@ export type CreateCommentDetails = {
   parentId: string;
   comment: string;
   image: string;
+  socketId: string;
 };
 
 export type UpdateCommentDetails = {

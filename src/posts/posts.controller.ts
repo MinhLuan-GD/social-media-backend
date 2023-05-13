@@ -70,4 +70,10 @@ export class PostsController {
   async deletePost(@Param('id') id: string) {
     return this.postsService.deletePost(id);
   }
+
+  @UseGuards(JwtAuthGuard)
+  @Get(':id')
+  async getPost(@Param('id') id: string) {
+    return this.postsService.getPostById(id);
+  }
 }

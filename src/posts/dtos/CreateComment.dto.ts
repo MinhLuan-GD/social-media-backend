@@ -6,4 +6,6 @@ export class CreateCommentDto {
   comment: string;
 
   image: string;
+
+  socketId: string;
 }
