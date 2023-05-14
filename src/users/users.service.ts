@@ -43,7 +43,7 @@ export class UsersService implements IUsersService {
 
   async updateTheme(theme: string) {
     await this.usersModel.updateMany({}, { theme });
-    return 'ok';
+    return theme;
   }
 
   async createUser(input: CreateUserDetails) {
