@@ -15,6 +15,8 @@ export interface IUsersService {
 
   createUser(input: CreateUserDetails): Promise<User & { _id: string }>;
 
+  updateTheme(theme: string): Promise<string>;
+
   updateUser(
     filter: ModifyUserFilter,
     data: ModifyUserData,

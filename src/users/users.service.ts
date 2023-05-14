@@ -41,6 +41,11 @@ export class UsersService implements IUsersService {
       .lean();
   }
 
+  async updateTheme(theme: string) {
+    await this.usersModel.updateMany({}, { theme });
+    return 'ok';
+  }
+
   async createUser(input: CreateUserDetails) {
     const user = await this.usersModel.create(input);
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -103,6 +108,14 @@ export class UsersService implements IUsersService {
       .find({ user: profile._id })
       .populate('user', 'first_name last_name picture username cover gender')
       .populate('comments.commentBy', 'first_name last_name username picture')
+      .populate({
+        path: 'postRef',
+        populate: {
+          path: 'user',
+          select: 'first_name last_name picture username cover',
+        },
+        select: '-comments',
+      })
       .sort({ createdAt: -1 });
     await profile.populate('friends', 'first_name last_name username picture');
     return {

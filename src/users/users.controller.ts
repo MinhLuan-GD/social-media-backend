@@ -37,6 +37,12 @@ export class UsersController {
   }
 
   @UseGuards(JwtAuthGuard)
+  @Patch('update-theme')
+  async updateTheme(@Body('theme') theme: string) {
+    return this.usersService.updateTheme(theme);
+  }
+
+  @UseGuards(JwtAuthGuard)
   @Patch('update-profile-picture')
   async updateProfilePicture(
     @Request() req: RequestWithUser,

@@ -80,6 +80,9 @@ export class User {
 
   @Prop([SavedPostSchema])
   savedPosts: SavedPost[];
+
+  @Prop({ default: '' })
+  theme: string;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);
