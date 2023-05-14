@@ -81,7 +81,7 @@ export class User {
   @Prop([SavedPostSchema])
   savedPosts: SavedPost[];
 
-  @Prop({ default: '' })
+  @Prop({ default: 'light' })
   theme: string;
 }
 
