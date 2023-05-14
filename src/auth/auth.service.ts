@@ -51,6 +51,7 @@ export class AuthService extends AuthUtil implements IAuthService {
       picture: user.picture,
       following: user.following,
       verified: user.verified,
+      theme: user.theme,
     };
     return { ...rs, token };
   }

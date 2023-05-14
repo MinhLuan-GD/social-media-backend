@@ -18,4 +18,5 @@ export interface AuthUser {
   picture: string;
   verified: boolean;
   following: User[];
+  theme: string;
 }

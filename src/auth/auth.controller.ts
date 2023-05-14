@@ -39,6 +39,7 @@ export class AuthController {
       picture,
       following,
       verified,
+      theme,
     } = req.user;
     return {
       id,
@@ -49,6 +50,7 @@ export class AuthController {
       following,
       verified,
       token,
+      theme,
     };
   }
 

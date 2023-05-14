@@ -36,6 +36,9 @@ export class Notification {
   postId: string;
 
   @Prop()
+  hateSpeechLabels: string[];
+
+  @Prop()
   commentId: string;
 
   createdAt: Date;

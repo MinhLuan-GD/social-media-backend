@@ -32,24 +32,25 @@ export class PostsService implements IPostsService {
   ) {}
 
   async createPost(createPostDetails: CreatePostDetails) {
-    let isToxic = false;
+    let hateSpeechLabels: string[] = [];
     if (createPostDetails.text) {
-      isToxic = await this.checkTextToxicity(createPostDetails.text);
+      hateSpeechLabels = await this.checkTextToxicity(createPostDetails.text);
     }
     if (!createPostDetails.type && !createPostDetails.text) {
       createPostDetails.type = 'picture';
     }
     const post = await this.postsModel.create({
       ...createPostDetails,
-      hidePost: isToxic,
+      hidePost: hateSpeechLabels && hateSpeechLabels.length > 0,
     });
     const server: Server = this.evenGateWay.server;
-    if (isToxic) {
+    if (hateSpeechLabels.length > 0) {
       const notification = await this.notificationsModel.create({
         user: createPostDetails.user,
         icon: 'system',
         text: 'Your post has been locked for violating our community standards with inappropriate language that could incite hatred.',
         isSystem: true,
+        hateSpeechLabels,
       });
       server
         .to(`users:${createPostDetails.user}`)
@@ -129,7 +130,7 @@ export class PostsService implements IPostsService {
     return post;
   }
 
-  async checkTextToxicity(text: string) {
+  async checkTextToxicity(text: string): Promise<string[]> {
     let toxicitySRes: any;
     try {
       toxicitySRes = await fetch(process.env.TOXICITY_URL, {
@@ -142,12 +143,13 @@ export class PostsService implements IPostsService {
       return;
     }
     const toxicitySData = await toxicitySRes.json();
+    const labels = [];
     for (const key in toxicitySData) {
       if (toxicitySData[key] === true) {
-        return true;
+        labels.push(key);
       }
     }
-    return false;
+    return labels;
   }
 
   async getAllPosts(id: string) {
@@ -224,10 +226,10 @@ export class PostsService implements IPostsService {
     createCommentDetails: CreateCommentDetails,
   ) {
     const { comment, image, postId, parentId, socketId } = createCommentDetails;
-    let isToxic = false;
+    let hateSpeechLabels: string[] = [];
     let notification: any = {};
     if (comment) {
-      isToxic = await this.checkTextToxicity(comment);
+      hateSpeechLabels = await this.checkTextToxicity(comment);
     }
     const { comments } = await this.postsModel
       .findByIdAndUpdate(
@@ -239,7 +241,7 @@ export class PostsService implements IPostsService {
               comment,
               parentId,
               commentBy,
-              hideComment: isToxic,
+              hideComment: hateSpeechLabels && hateSpeechLabels.length > 0,
               commentAt: new Date(),
             },
           },
@@ -249,14 +251,27 @@ export class PostsService implements IPostsService {
       .populate('comments.commentBy', 'picture first_name last_name username')
       .lean();
     const server: Server = this.evenGateWay.server;
-    if (isToxic) {
+    if (hateSpeechLabels.length > 0) {
       notification = await this.notificationsModel.create({
         user: commentBy,
         icon: 'system',
         text: 'Your comment has been locked for violating our community standards with inappropriate language that could incite hatred.',
         isSystem: true,
+        hateSpeechLabels,
       });
       server.to(`users:${commentBy}`).emit('toxicNotification', notification);
+    }
+
+    const post = await this.postsModel.findById(postId).lean();
+
+    if (post.user.toString() !== commentBy) {
+      await this.notificationsModel.create({
+        user: post.user,
+        icon: 'comment',
+        text: 'commented on your post.',
+        postId,
+        commentId: comments[comments.length - 1]._id,
+      });
     }
 
     const commentObj = comments[comments.length - 1];
@@ -287,18 +302,19 @@ export class PostsService implements IPostsService {
       throw new HttpException('cant find comment', HttpStatus.CONFLICT);
     }
 
-    let isToxic = false;
+    let hateSpeechLabels: string[] = [];
     let notification = {};
     if (comment) {
-      isToxic = await this.checkTextToxicity(comment);
+      hateSpeechLabels = await this.checkTextToxicity(comment);
     }
-    if (isToxic) {
+    if (hateSpeechLabels.length > 0) {
       const server: Server = this.evenGateWay.server;
       notification = await this.notificationsModel.create({
         user: commentBy,
         icon: 'system',
         text: 'Your comment has been locked for violating our community standards with inappropriate language that could incite hatred.',
         isSystem: true,
+        hateSpeechLabels,
       });
       server.to(`users:${commentBy}`).emit('toxicNotification', notification);
     }
@@ -311,7 +327,8 @@ export class PostsService implements IPostsService {
             'comments.$.comment': comment,
             'comments.$.image': image,
             'comments.$.updateAt': new Date(),
-            'comments.$.hideComment': isToxic,
+            'comments.$.hideComment':
+              hateSpeechLabels && hateSpeechLabels.length > 0,
           },
         },
         { new: true },
