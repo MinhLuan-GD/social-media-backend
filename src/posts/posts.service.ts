@@ -55,6 +55,13 @@ export class PostsService implements IPostsService {
         .to(`users:${createPostDetails.user}`)
         .emit('toxicNotification', notification);
     }
+
+    if (createPostDetails.type === 'share') {
+      await this.postsModel.findByIdAndUpdate(createPostDetails.postRef, {
+        $inc: { shareCount: 1 },
+      });
+    }
+
     const postRs = await this.postsModel
       .findById(post._id)
       .populate('user', 'first_name last_name cover picture username gender')
@@ -66,12 +73,6 @@ export class PostsService implements IPostsService {
         },
         select: '-comments',
       });
-
-    if (createPostDetails.type === 'share') {
-      await this.postsModel.findByIdAndUpdate(createPostDetails.postRef, {
-        $inc: { shareCount: 1 },
-      });
-    }
 
     const text =
       createPostDetails.type === 'share'
