@@ -74,7 +74,7 @@ export class PostsService implements IPostsService {
           user: friend,
           icon: 'post',
           from: user._id,
-          text: `${user.first_name} ${user.last_name} has posted something.`,
+          text: 'has posted something.',
           postId: post._id,
         });
         const notificationPayload = {
