@@ -55,10 +55,17 @@ export class PostsService implements IPostsService {
         .to(`users:${createPostDetails.user}`)
         .emit('toxicNotification', notification);
     }
-    const postRs = await post.populate(
-      'user',
-      'first_name last_name cover picture username gender',
-    );
+    const postRs = await this.postsModel
+      .findById(post._id)
+      .populate('user', 'first_name last_name cover picture username gender')
+      .populate({
+        path: 'postRef',
+        populate: {
+          path: 'user',
+          select: 'first_name last_name picture username cover',
+        },
+        select: '-comments',
+      });
 
     if (postRs.whoCanSee !== 'private') {
       const user = await this.usersModel.findById(createPostDetails.user);
