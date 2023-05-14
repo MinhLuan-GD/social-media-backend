@@ -67,6 +67,16 @@ export class PostsService implements IPostsService {
         select: '-comments',
       });
 
+    if (createPostDetails.type === 'share') {
+      await this.postsModel.findByIdAndUpdate(createPostDetails.postRef, {
+        $inc: { shareCount: 1 },
+      });
+    }
+
+    const text =
+      createPostDetails.type === 'share'
+        ? 'shared a post with you'
+        : 'has posted something.';
     if (postRs.whoCanSee !== 'private') {
       const user = await this.usersModel.findById(createPostDetails.user);
       for (const friend of user.friends) {
@@ -74,7 +84,7 @@ export class PostsService implements IPostsService {
           user: friend,
           icon: 'post',
           from: user._id,
-          text: 'has posted something.',
+          text,
           postId: post._id,
         });
         const notificationPayload = {

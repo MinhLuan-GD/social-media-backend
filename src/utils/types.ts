@@ -52,6 +52,7 @@ export type CreatePostDetails = {
   type: string;
   text: string;
   images: Array<{ url: string }>;
+  postRef: string;
   user: string;
   background: string;
 };

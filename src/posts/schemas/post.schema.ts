@@ -45,6 +45,9 @@ export class Post {
   @Prop({ enum: ['public', 'private', 'friends'], default: 'public' })
   whoCanSee: string;
 
+  @Prop({ default: 0 })
+  shareCount: number;
+
   @Prop()
   background: string;
 

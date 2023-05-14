@@ -10,6 +10,8 @@ export class CreatePostDto {
 
   text: string;
 
+  postRef: string;
+
   whoCanSee: string;
 
   images: CreateImageDto[];
