@@ -41,8 +41,8 @@ export class UsersService implements IUsersService {
       .lean();
   }
 
-  async updateTheme(theme: string) {
-    await this.usersModel.updateMany({}, { theme });
+  async updateTheme(theme: string, id: string) {
+    await this.usersModel.findOneAndUpdate({ _id: id }, { theme });
     return theme;
   }
 
