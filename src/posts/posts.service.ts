@@ -255,6 +255,7 @@ export class PostsService implements IPostsService {
       notification = await this.notificationsModel.create({
         user: commentBy,
         icon: 'system',
+        from: commentBy,
         text: 'Your comment has been locked for violating our community standards with inappropriate language that could incite hatred.',
         isSystem: true,
         hateSpeechLabels,
