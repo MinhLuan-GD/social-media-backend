@@ -18,6 +18,11 @@ import {
   ModifyUserFilter,
 } from '@/utils/types';
 import { IUsersService } from './users';
+import { EventsGateway } from '@/gateway/events.gateway';
+import {
+  Notification,
+  NotificationDocument,
+} from '@/notifications/schemas/notification.schema';
 
 @Injectable()
 export class UsersService implements IUsersService {
@@ -26,8 +31,12 @@ export class UsersService implements IUsersService {
     private usersModel: Model<UserDocument>,
     @InjectModel(Post.name)
     private postsModel: Model<PostDocument>,
+    @InjectModel(Notification.name)
+    private notificationsModel: Model<NotificationDocument>,
     @Inject(CACHE_MANAGER)
     private cacheManager: Cache,
+    @Inject(EventsGateway)
+    private readonly evenGateWay: EventsGateway,
   ) {}
 
   async findUser(param: FindUserParams) {
@@ -221,6 +230,35 @@ export class UsersService implements IUsersService {
           $push: { friends: receiver._id, followers: receiver._id },
         });
         await receiver.updateOne({ $pull: { requests: sender._id } });
+
+        const notification = await this.notificationsModel.create({
+          from: receiverId,
+          user: senderId,
+          icon: 'friend',
+          text: 'accepted your friend request',
+        });
+
+        const user = await this.usersModel.findById(receiverId);
+
+        const notificationPayload = {
+          _id: notification._id,
+          user: senderId,
+          from: {
+            _id: user._id,
+            first_name: user.first_name,
+            last_name: user.last_name,
+            picture: user.picture,
+          },
+          icon: 'friend',
+          text: notification.text,
+          createdAt: notification.createdAt,
+          updatedAt: notification.updatedAt,
+        };
+
+        const server = this.evenGateWay.server;
+        server
+          .to(`users:${senderId}`)
+          .emit('friendRequestAccepted', notificationPayload);
         return 'friend request accepted';
       } else throw new HttpException('Already friends', HttpStatus.CONFLICT);
     } else {

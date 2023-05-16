@@ -6,14 +6,21 @@ import { userCacheOpts } from '@/cache';
 import { UsersService } from './users.service';
 import { UsersController } from './users.controller';
 import { Services } from '@/utils/constants';
+import { EventsModule } from '@/gateway/events.module';
+import {
+  Notification,
+  NotificationSchema,
+} from '@/notifications/schemas/notification.schema';
 
 @Module({
   imports: [
     MongooseModule.forFeature([
       { name: User.name, schema: UserSchema },
       { name: Post.name, schema: PostSchema },
+      { name: Notification.name, schema: NotificationSchema },
     ]),
     CacheModule.registerAsync(userCacheOpts),
+    EventsModule,
   ],
   providers: [
     {
