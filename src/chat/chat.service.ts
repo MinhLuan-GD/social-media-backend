@@ -183,6 +183,6 @@ export class ChatService implements IChatService {
       conversation.save();
     });
 
-    return 'ok';
+    return conversations;
   }
 }
