@@ -1,5 +1,5 @@
 import { User, UserDocument } from '@/users/schemas/user.schema';
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import {
@@ -7,6 +7,7 @@ import {
   ConversationDocument,
 } from './schemas/conversation.schema';
 import { IChatService } from './chat';
+import { EventsGateway } from '@/gateway/events.gateway';
 
 @Injectable()
 export class ChatService implements IChatService {
@@ -15,6 +16,8 @@ export class ChatService implements IChatService {
     private conversationsModel: Model<ConversationDocument>,
     @InjectModel(User.name)
     private usersModel: Model<UserDocument>,
+    @Inject(EventsGateway)
+    private readonly evenGateWay: EventsGateway,
   ) {}
 
   async conversations(id: string, skip = 0) {
@@ -182,6 +185,20 @@ export class ChatService implements IChatService {
       });
       conversation.save();
     });
+
+    const userIds = conversations.map((conversation) => {
+      const { members } = conversation;
+      return members.find((member) => member.toString() != userId).toString();
+    });
+
+    for (const id of userIds) {
+      const newConversations = await this.conversationsModel.find({
+        members: { $elemMatch: { $eq: id } },
+      });
+      this.evenGateWay.server
+        .to(`users:${id}`)
+        .emit('seenAllConversations', newConversations);
+    }
 
     return conversations;
   }

@@ -8,6 +8,7 @@ import {
 import { MongooseModule } from '@nestjs/mongoose';
 import { User, UserSchema } from '@/users/schemas/user.schema';
 import { Services } from '@/utils/constants';
+import { EventsModule } from '@/gateway/events.module';
 
 @Module({
   imports: [
@@ -15,6 +16,7 @@ import { Services } from '@/utils/constants';
       { name: Conversation.name, schema: ConversationSchema },
       { name: User.name, schema: UserSchema },
     ]),
+    EventsModule,
   ],
   providers: [
     {
