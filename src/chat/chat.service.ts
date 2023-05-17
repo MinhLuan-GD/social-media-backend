@@ -168,4 +168,21 @@ export class ChatService implements IChatService {
 
     return messages;
   }
+
+  async seenAllConversations(userId: string) {
+    const conversations = await this.conversationsModel.find({
+      members: { $elemMatch: { $eq: userId } },
+    });
+
+    conversations.forEach((conversation) => {
+      conversation.messages.forEach((message) => {
+        if (message.status === 'unseen' || message.status === 'delivered') {
+          message.status = 'seen';
+        }
+      });
+      conversation.save();
+    });
+
+    return 'ok';
+  }
 }

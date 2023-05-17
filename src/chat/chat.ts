@@ -18,4 +18,6 @@ export interface IChatService {
   seenAll(conversationId: string): Promise<Message[]>;
 
   deliveredAll(conversationId: string): Promise<Message[]>;
+
+  seenAllConversations(userId: string): Promise<string>;
 }
