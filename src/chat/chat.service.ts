@@ -191,7 +191,7 @@ export class ChatService implements IChatService {
 
     const userIds = conversations.map((conversation) => {
       const { members } = conversation;
-      return members.find((member) => member._id !== userId)._id;
+      return members.find((member) => member._id != userId)._id;
     });
 
     for (const id of userIds) {

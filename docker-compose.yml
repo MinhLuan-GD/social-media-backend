@@ -29,7 +29,6 @@ services:
       FONT_END_URL: http://localhost:3000
       TOXICITY_URL: http://toxicity-service/score-comment
       DB_URI: mongodb://db:27017/sm
-      # DB_URI: mongodb+srv://luan:aH1IAzsABXB0SVP8@cluster0.l2ssvan.mongodb.net/sm
       STORE_HOST: store
       STORE_PORT: 6379
       SECRET_KEY: secret123
