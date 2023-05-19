@@ -144,10 +144,10 @@ export class EventsGateway {
 
   @SubscribeMessage('joinPostCommentTyping')
   async joinPostTyping(client: Socket, postId: string) {
+    client.join(`posts:${postId}:commentTyping`);
     const sockets = await this.server
       .in(`posts:${postId}:commentTyping`)
       .fetchSockets();
-    client.join(`posts:${postId}:commentTyping`);
     if (sockets.length === 1) {
       const socketIds = sockets.map((socket) => socket.id);
       this.server.emit('startPostCommentTyping', { postId, socketIds });
