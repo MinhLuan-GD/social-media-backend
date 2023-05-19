@@ -143,15 +143,18 @@ export class EventsGateway {
   }
 
   @SubscribeMessage('joinPostCommentTyping')
-  async joinPostTyping(client: Socket, postId: string) {
-    client.join(`posts:${postId}:commentTyping`);
+  async joinPostTyping(client: Socket, payload: any) {
     const sockets = await this.server
-      .in(`posts:${postId}:commentTyping`)
+      .in(`posts:${payload.postId}:commentTyping`)
       .fetchSockets();
-    if (sockets.length === 1) {
+    if (sockets.length >= 0) {
       const socketIds = sockets.map((socket) => socket.id);
-      this.server.emit('startPostCommentTyping', { postId, socketIds });
+      this.server.emit('startPostCommentTyping', {
+        postId: payload.postId,
+        socketIds,
+      });
     }
+    client.join(`posts:${payload.postId}:commentTyping`);
   }
 
   @SubscribeMessage('leavePostCommentTyping')
