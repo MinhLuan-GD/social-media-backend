@@ -147,11 +147,11 @@ export class EventsGateway {
     const sockets = await this.server
       .in(`posts:${postId}:commentTyping`)
       .fetchSockets();
-    if (sockets.length === 0) {
+    client.join(`posts:${postId}:commentTyping`);
+    if (sockets.length === 1) {
       const socketIds = sockets.map((socket) => socket.id);
       this.server.emit('startPostCommentTyping', { postId, socketIds });
     }
-    client.join(`posts:${postId}:commentTyping`);
   }
 
   @SubscribeMessage('leavePostCommentTyping')
