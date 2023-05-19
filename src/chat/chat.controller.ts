@@ -68,4 +68,10 @@ export class ChatController {
   async seenAllConversations(@Request() req: RequestWithUser) {
     return this.chatService.seenAllConversations(req.user._id);
   }
+
+  @UseGuards(JwtAuthGuard)
+  @Patch('delivered-all-conversations')
+  async deliveredAllConversations(@Request() req: RequestWithUser) {
+    return this.chatService.deliveredAllConversations(req.user._id);
+  }
 }

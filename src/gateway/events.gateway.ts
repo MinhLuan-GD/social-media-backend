@@ -148,7 +148,8 @@ export class EventsGateway {
       .in(`posts:${postId}:commentTyping`)
       .fetchSockets();
     if (sockets.length === 0) {
-      this.server.emit('startPostCommentTyping', postId);
+      const socketIds = sockets.map((socket) => socket.id);
+      this.server.emit('startPostCommentTyping', { postId, socketIds });
     }
     client.join(`posts:${postId}:commentTyping`);
   }
