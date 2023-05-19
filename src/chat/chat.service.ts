@@ -208,4 +208,41 @@ export class ChatService implements IChatService {
 
     return conversations;
   }
+
+  async deliveredAllConversations(userId: string) {
+    const conversations = await this.conversationsModel
+      .find({
+        members: { $elemMatch: { $eq: userId } },
+      })
+      .populate('members', 'first_name last_name picture')
+      .select('-messages.updatedAt');
+
+    for (const conversation of conversations) {
+      conversation.messages.forEach((message) => {
+        if (message.status === 'unseen') {
+          message.status = 'delivered';
+        }
+      });
+      await conversation.save();
+    }
+
+    const userIds = conversations.map((conversation) => {
+      const { members } = conversation;
+      return members.find((member) => member._id != userId)._id;
+    });
+
+    for (const id of userIds) {
+      const newConversations = await this.conversationsModel
+        .find({
+          members: { $elemMatch: { $eq: id } },
+        })
+        .populate('members', 'first_name last_name picture')
+        .select('-messages.updatedAt');
+      this.evenGateWay.server
+        .to(`users:${id}`)
+        .emit('deliveredAllConversations', newConversations);
+    }
+
+    return conversations;
+  }
 }
