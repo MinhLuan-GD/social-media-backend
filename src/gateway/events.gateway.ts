@@ -143,18 +143,18 @@ export class EventsGateway {
   }
 
   @SubscribeMessage('joinPostCommentTyping')
-  async joinPostTyping(client: Socket, payload: any) {
-    const sockets = await this.server
-      .in(`posts:${payload.postId}:commentTyping`)
+  async joinPostTyping(client: Socket, postId: string) {
+    client.join(`posts:${postId}:commentTyping`);
+    const typingRoom = await this.server
+      .in(`posts:${postId}:commentTyping`)
       .fetchSockets();
-    if (sockets.length >= 0) {
-      const socketIds = sockets.map((socket) => socket.id);
-      this.server.emit('startPostCommentTyping', {
-        postId: payload.postId,
-        socketIds,
-      });
-    }
-    client.join(`posts:${payload.postId}:commentTyping`);
+    const typingRoomIds = typingRoom.map((socket) => socket.id);
+    const commentRoom = await this.server.in(`posts:${postId}`).fetchSockets();
+    const commentRoomIds = commentRoom.map((socket) => socket.id);
+    const notTypingIds = commentRoomIds.filter(
+      (id) => !typingRoomIds.includes(id),
+    );
+    this.server.to(notTypingIds).emit('startPostCommentTyping');
   }
 
   @SubscribeMessage('leavePostCommentTyping')
@@ -164,7 +164,19 @@ export class EventsGateway {
       .in(`posts:${postId}:commentTyping`)
       .fetchSockets();
     if (sockets.length === 0) {
-      this.server.emit('stopPostCommentTyping', postId);
+      this.server.to(`posts:${postId}`).emit('stopPostCommentTyping');
+    } else {
+      this.server.to(client.id).emit('startPostCommentTyping');
     }
+  }
+
+  @SubscribeMessage('joinPostComment')
+  async joinPostComment(client: Socket, postId: string) {
+    client.join(`posts:${postId}`);
+  }
+
+  @SubscribeMessage('leavePostComment')
+  async leavePostComment(client: Socket, postId: string) {
+    client.leave(`posts:${postId}`);
   }
 }
