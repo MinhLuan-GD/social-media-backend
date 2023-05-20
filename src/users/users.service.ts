@@ -210,6 +210,9 @@ export class UsersService implements IUsersService {
           .select('first_name last_name picture username')
           .lean();
 
+        const server = this.evenGateWay.server;
+        server.to(`users:${receiverId}`).emit('cancelRequest');
+
         return { friends, requests, sentRequests };
       } else throw new HttpException('Already Canceled', HttpStatus.CONFLICT);
     } else {
@@ -347,6 +350,8 @@ export class UsersService implements IUsersService {
             followers: receiver._id,
           },
         });
+        const server = this.evenGateWay.server;
+        server.to(`users:${receiverId}`).emit('unfriend');
         return 'unfriend request accepted';
       } else
         throw new HttpException('Already not friends', HttpStatus.CONFLICT);
@@ -378,6 +383,9 @@ export class UsersService implements IUsersService {
           .find({ requests: receiverId })
           .select('first_name last_name picture username')
           .lean();
+
+        const server = this.evenGateWay.server;
+        server.to(`users:${senderId}`).emit('deleteRequest');
 
         return { friends, requests, sentRequests };
       } else
