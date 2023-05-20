@@ -11,7 +11,7 @@ import { User } from './schemas/user.schema';
 export interface IUsersService {
   findUser(param: FindUserParams): Promise<User & { _id: string }>;
 
-  findUserAndFollow(email: string): Promise<User & { _id: string }>;
+  findUserAndFriends(email: string): Promise<User & { _id: string }>;
 
   createUser(input: CreateUserDetails): Promise<User & { _id: string }>;
 
@@ -36,17 +36,17 @@ export interface IUsersService {
 
   addFriend(senderId: string, receiverId: string): Promise<string>;
 
-  cancelRequest(senderId: string, receiverId: string): Promise<string>;
+  cancelRequest(senderId: string, receiverId: string): Promise<any>;
 
   follow(senderId: string, receiverId: string): Promise<string>;
 
   unfollow(senderId: string, receiverId: string): Promise<string>;
 
-  acceptRequest(senderId: string, receiverId: string): Promise<string>;
+  acceptRequest(senderId: string, receiverId: string): Promise<any>;
 
   unfriend(senderId: string, receiverId: string): Promise<string>;
 
-  deleteRequest(senderId: string, receiverId: string): Promise<string>;
+  deleteRequest(senderId: string, receiverId: string): Promise<any>;
 
   search(searchTerm: string): Promise<Array<User & { _id: string }>>;
 

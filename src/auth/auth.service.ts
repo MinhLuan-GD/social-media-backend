@@ -7,7 +7,7 @@ import { CreateUserDto } from './dtos/CreateUser.dto';
 @Injectable()
 export class AuthService extends AuthUtil implements IAuthService {
   async validateUser(email: string, pass: string) {
-    const user = await this.usersService.findUserAndFollow(email);
+    const user = await this.usersService.findUserAndFriends(email);
     if (user && compareSync(pass, user.password)) {
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { password, ...result } = user;
@@ -29,7 +29,7 @@ export class AuthService extends AuthUtil implements IAuthService {
   }
 
   async signup(input: CreateUserDto) {
-    const findUser = await this.usersService.findUserAndFollow(input.email);
+    const findUser = await this.usersService.findUserAndFriends(input.email);
     if (findUser) throw new HttpException('conflict', HttpStatus.CONFLICT);
     const password = await hash(input.password, 10);
     const username = await this.gUsername(input.first_name + input.last_name);
@@ -49,7 +49,7 @@ export class AuthService extends AuthUtil implements IAuthService {
       last_name: user.last_name,
       username: user.username,
       picture: user.picture,
-      following: user.following,
+      friends: user.friends,
       verified: user.verified,
       theme: user.theme,
     };

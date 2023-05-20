@@ -37,7 +37,7 @@ export class AuthController {
       last_name,
       username,
       picture,
-      following,
+      friends,
       verified,
       theme,
     } = req.user;
@@ -47,7 +47,7 @@ export class AuthController {
       last_name,
       username,
       picture,
-      following,
+      friends,
       verified,
       token,
       theme,

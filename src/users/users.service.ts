@@ -43,10 +43,10 @@ export class UsersService implements IUsersService {
     return this.usersModel.findOne(param).lean();
   }
 
-  async findUserAndFollow(email: string) {
+  async findUserAndFriends(email: string) {
     return this.usersModel
       .findOne({ email })
-      .populate('following', 'picture first_name last_name')
+      .populate('friends', 'picture first_name last_name')
       .lean();
   }
 
@@ -146,6 +146,37 @@ export class UsersService implements IUsersService {
         await receiver.updateOne({ $push: { requests: sender._id } });
         await receiver.updateOne({ $push: { followers: sender._id } });
         await sender.updateOne({ $push: { following: receiver._id } });
+
+        const user = await this.usersModel.findById(senderId);
+
+        const notification = await this.notificationsModel.create({
+          from: senderId,
+          user: receiverId,
+          icon: 'friend',
+          text: 'sent you a friend request',
+        });
+
+        const notificationPayload = {
+          _id: notification._id,
+          user: receiverId,
+          from: {
+            _id: user._id,
+            first_name: user.first_name,
+            last_name: user.last_name,
+            username: user.username,
+            picture: user.picture,
+          },
+          icon: 'friend',
+          text: notification.text,
+          createdAt: notification.createdAt,
+          updatedAt: notification.updatedAt,
+        };
+
+        const server = this.evenGateWay.server;
+        server
+          .to(`users:${receiverId}`)
+          .emit('friendSentRequest', notificationPayload);
+
         return 'friend request has been sent';
       } else throw new HttpException('Already sent', HttpStatus.CONFLICT);
     } else {
@@ -168,7 +199,18 @@ export class UsersService implements IUsersService {
         await receiver.updateOne({ $pull: { requests: sender._id } });
         await receiver.updateOne({ $pull: { followers: sender._id } });
         await sender.updateOne({ $pull: { following: receiver._id } });
-        return 'you successfully canceled request';
+        const { friends, requests } = await this.usersModel
+          .findById(senderId)
+          .select('friends requests')
+          .populate('friends', 'first_name last_name picture username')
+          .populate('requests', 'first_name last_name picture username')
+          .lean();
+        const sentRequests = await this.usersModel
+          .find({ requests: senderId })
+          .select('first_name last_name picture username')
+          .lean();
+
+        return { friends, requests, sentRequests };
       } else throw new HttpException('Already Canceled', HttpStatus.CONFLICT);
     } else {
       throw new HttpException(
@@ -247,6 +289,7 @@ export class UsersService implements IUsersService {
             _id: user._id,
             first_name: user.first_name,
             last_name: user.last_name,
+            username: user.username,
             picture: user.picture,
           },
           icon: 'friend',
@@ -259,7 +302,19 @@ export class UsersService implements IUsersService {
         server
           .to(`users:${senderId}`)
           .emit('friendRequestAccepted', notificationPayload);
-        return 'friend request accepted';
+
+        const { friends, requests } = await this.usersModel
+          .findById(receiverId)
+          .select('friends requests')
+          .populate('friends', 'first_name last_name picture username')
+          .populate('requests', 'first_name last_name picture username')
+          .lean();
+        const sentRequests = await this.usersModel
+          .find({ requests: receiverId })
+          .select('first_name last_name picture username')
+          .lean();
+
+        return { friends, requests, sentRequests };
       } else throw new HttpException('Already friends', HttpStatus.CONFLICT);
     } else {
       throw new HttpException(
@@ -313,7 +368,18 @@ export class UsersService implements IUsersService {
           $pull: { requests: sender._id, followers: sender._id },
         });
         await sender.updateOne({ $pull: { following: receiver._id } });
-        return 'delete request accepted';
+        const { friends, requests } = await this.usersModel
+          .findById(receiverId)
+          .select('friends requests')
+          .populate('friends', 'first_name last_name picture username')
+          .populate('requests', 'first_name last_name picture username')
+          .lean();
+        const sentRequests = await this.usersModel
+          .find({ requests: receiverId })
+          .select('first_name last_name picture username')
+          .lean();
+
+        return { friends, requests, sentRequests };
       } else
         throw new HttpException('Already deleted friends', HttpStatus.CONFLICT);
     } else

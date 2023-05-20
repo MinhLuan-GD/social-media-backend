@@ -263,9 +263,10 @@ export class PostsService implements IPostsService {
     }
 
     const post = await this.postsModel.findById(postId).lean();
+    const commentObj = comments[comments.length - 1];
 
     if (post.user.toString() !== commentBy) {
-      await this.notificationsModel.create({
+      const notification = await this.notificationsModel.create({
         user: post.user,
         icon: 'comment',
         text: 'commented on your post.',
@@ -273,9 +274,31 @@ export class PostsService implements IPostsService {
         postId,
         commentId: comments[comments.length - 1]._id,
       });
+
+      const user = await this.usersModel.findById(commentBy).lean();
+
+      const notificationPayload = {
+        _id: notification._id,
+        user: post.user.toString(),
+        from: {
+          _id: user._id,
+          first_name: user.first_name,
+          last_name: user.last_name,
+          picture: user.picture,
+        },
+        icon: notification.icon,
+        postId,
+        commentId: commentObj._id,
+        text: notification.text,
+        createdAt: notification.createdAt,
+        updatedAt: notification.updatedAt,
+      };
+
+      server
+          .to(`users:${post.user.toString()}`)
+          .emit('commentNotification', notificationPayload);
     }
 
-    const commentObj = comments[comments.length - 1];
     server.sockets.sockets.forEach((socket) => {
       if (socket.id !== socketId) {
         server.to(socket.id).emit('newComment', {
