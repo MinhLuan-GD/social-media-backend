@@ -159,7 +159,7 @@ export class EventsGateway {
       .fetchSockets();
     if (sockets.length === 1) {
       this.server.to(sockets[0].id).emit('stopPostCommentTyping');
-    } else if (sockets.length > 1) {
+    } else if (sockets.length === 0) {
       this.server.to(`posts:${postId}`).emit('stopPostCommentTyping');
     }
   }
