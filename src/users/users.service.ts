@@ -211,7 +211,7 @@ export class UsersService implements IUsersService {
           .lean();
 
         const server = this.evenGateWay.server;
-        server.to(`users:${receiverId}`).emit('cancelRequest');
+        server.to(`users:${receiverId}`).emit('cancelRequest', sender.username);
 
         return { friends, requests, sentRequests };
       } else throw new HttpException('Already Canceled', HttpStatus.CONFLICT);
@@ -351,7 +351,7 @@ export class UsersService implements IUsersService {
           },
         });
         const server = this.evenGateWay.server;
-        server.to(`users:${receiverId}`).emit('unfriend');
+        server.to(`users:${receiverId}`).emit('unfriend', sender.username);
         return 'unfriend request accepted';
       } else
         throw new HttpException('Already not friends', HttpStatus.CONFLICT);
@@ -385,7 +385,7 @@ export class UsersService implements IUsersService {
           .lean();
 
         const server = this.evenGateWay.server;
-        server.to(`users:${senderId}`).emit('deleteRequest');
+        server.to(`users:${senderId}`).emit('deleteRequest', receiver.username);
 
         return { friends, requests, sentRequests };
       } else
