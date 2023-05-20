@@ -148,7 +148,9 @@ export class EventsGateway {
     const commentRoom = await this.server.in(`posts:${postId}`).fetchSockets();
     const commentRoomIds = commentRoom.map((socket) => socket.id);
     const msgSocket = commentRoomIds.filter((id) => id != client.id);
-    this.server.to(msgSocket).emit('startPostCommentTyping');
+    if (msgSocket.length > 0) {
+      this.server.to(msgSocket).emit('startPostCommentTyping');
+    }
   }
 
   @SubscribeMessage('leavePostCommentTyping')
