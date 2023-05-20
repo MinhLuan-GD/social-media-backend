@@ -145,16 +145,10 @@ export class EventsGateway {
   @SubscribeMessage('joinPostCommentTyping')
   async joinPostTyping(client: Socket, postId: string) {
     client.join(`posts:${postId}:commentTyping`);
-    const typingRoom = await this.server
-      .in(`posts:${postId}:commentTyping`)
-      .fetchSockets();
-    const typingRoomIds = typingRoom.map((socket) => socket.id);
     const commentRoom = await this.server.in(`posts:${postId}`).fetchSockets();
     const commentRoomIds = commentRoom.map((socket) => socket.id);
-    const notTypingIds = commentRoomIds.filter(
-      (id) => !typingRoomIds.includes(id),
-    );
-    this.server.to(notTypingIds).emit('startPostCommentTyping');
+    const msgSocket = commentRoomIds.filter((id) => id != client.id);
+    this.server.to(msgSocket).emit('startPostCommentTyping');
   }
 
   @SubscribeMessage('leavePostCommentTyping')
@@ -163,10 +157,10 @@ export class EventsGateway {
     const sockets = await this.server
       .in(`posts:${postId}:commentTyping`)
       .fetchSockets();
-    if (sockets.length === 0) {
+    if (sockets.length === 1) {
+      this.server.to(sockets[0].id).emit('stopPostCommentTyping');
+    } else if (sockets.length > 1) {
       this.server.to(`posts:${postId}`).emit('stopPostCommentTyping');
-    } else {
-      this.server.to(client.id).emit('startPostCommentTyping');
     }
   }
 
