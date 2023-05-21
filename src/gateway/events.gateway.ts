@@ -14,7 +14,7 @@ import {
   StartTypingMessagePayload,
   StopTypingMessagePayload,
 } from './interfaces/payload';
-import { IUser } from './interfaces/user';
+import { IUser, UsersOnline } from './interfaces/user';
 import { InjectModel } from '@nestjs/mongoose';
 import { User, UserDocument } from '@/users/schemas/user.schema';
 import { Model } from 'mongoose';
@@ -38,6 +38,8 @@ export class EventsGateway {
     @InjectModel(User.name)
     private usersModel: Model<UserDocument>,
   ) {}
+
+  usersOnline: UsersOnline = {};
 
   addUser(
     userId: string,
@@ -143,29 +145,34 @@ export class EventsGateway {
   @SubscribeMessage('joinUser')
   async joinUser(client: Socket, userId: string) {
     client.join(`users:${userId}`);
-    const allRooms = this.server.sockets.adapter.rooms;
-    const roomsArr = Array.from(allRooms.keys());
-    const usersRooms = roomsArr.filter((roomName) => /^users:/.test(roomName));
-    const userIds = usersRooms
-      .filter((value, index) => usersRooms.indexOf(value) === index)
-      .map((roomName) => roomName.split(':')[1]);
+    this.usersOnline[userId] = new Date().toISOString();
+    this.getFriendsOnline(null, userId);
+  }
+
+  @SubscribeMessage('getFriendsOnline')
+  async getFriendsOnline(_client: Socket, userId: string) {
     const { friends } = await this.usersModel.findById(userId).lean();
     const friendsIds = friends.map((friend) => friend.toString());
-    const friendsOnlineId = friendsIds.filter((friendId) =>
-      userIds.includes(friendId),
-    );
-    const usersFind = await this.usersModel.find(
-      {
-        _id: { $in: friendsOnlineId },
-      },
-      'first_name last_name picture _id',
-    );
-    const friendsOnline = usersFind.map((user) => ({
-      userId: user._id,
-      userName: `${user.first_name} ${user.last_name}`,
-      picture: user.picture,
-    }));
-    this.server.to(client.id).emit('getFriendsOnline', friendsOnline);
+    friendsIds.forEach(async (friendId) => {
+      if (this.usersOnline[friendId]) {
+        const user = await this.usersModel.findById(friendId).lean();
+        const friends = await this.usersModel
+          .find({
+            _id: { $in: user.friends },
+          })
+          .select('first_name last_name picture _id')
+          .lean();
+        const friendsOnline = friends.map((friend) => ({
+          userId: friend._id,
+          userName: `${friend.first_name} ${friend.last_name}`,
+          picture: friend.picture,
+          timeJoin: this.usersOnline[friend._id],
+        }));
+        this.server
+          .to(`users:${friendId}`)
+          .emit('getFriendsOnline', friendsOnline);
+      }
+    });
   }
 
   @SubscribeMessage('leaveUser')

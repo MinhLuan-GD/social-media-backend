@@ -5,3 +5,7 @@ export interface IUser {
   picture: string;
   timeJoin: string;
 }
+
+export interface UsersOnline {
+  [key: string]: string;
+}
