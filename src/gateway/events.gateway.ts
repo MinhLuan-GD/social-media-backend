@@ -65,11 +65,12 @@ export class EventsGateway {
     client.on('disconnecting', () => {
       const userId = [...client.rooms]
         .find((s) => /users:/.test(s))
-        .split(':')[1];
-      const skO = this.usersOnline[userId].socketIds;
-      skO.splice(skO.indexOf(client.id), 1);
-      if (skO.length === 0) delete this.usersOnline[userId];
-      console.log(this.usersOnline);
+        ?.split(':')[1];
+      if (userId) {
+        const skO = this.usersOnline[userId].socketIds;
+        skO.splice(skO.indexOf(client.id), 1);
+        if (skO.length === 0) delete this.usersOnline[userId];
+      }
     });
   }
 
