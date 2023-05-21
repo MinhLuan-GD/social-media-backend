@@ -7,5 +7,8 @@ export interface IUser {
 }
 
 export interface UsersOnline {
-  [key: string]: string;
+  [key: string]: {
+    timeJoin: string;
+    socketIds: string[];
+  };
 }

@@ -62,6 +62,15 @@ export class EventsGateway {
 
   handleConnection(client: Socket) {
     console.log(`Client id: ${client.id} has connected.`);
+    client.on('disconnecting', () => {
+      const userId = [...client.rooms]
+        .find((s) => /users:/.test(s))
+        .split(':')[1];
+      const skO = this.usersOnline[userId].socketIds;
+      skO.splice(skO.indexOf(client.id), 1);
+      if (skO.length === 0) delete this.usersOnline[userId];
+      console.log(this.usersOnline);
+    });
   }
 
   handleDisconnect(client: Socket) {
@@ -145,20 +154,36 @@ export class EventsGateway {
   @SubscribeMessage('joinUser')
   async joinUser(client: Socket, userId: string) {
     client.join(`users:${userId}`);
-    this.usersOnline[userId] = new Date().toISOString();
+    this.usersOnline[userId] = {
+      timeJoin: new Date().toISOString(),
+      socketIds: [client.id],
+    };
     this.getFriendsOnline(null, userId);
+  }
+
+  @SubscribeMessage('leaveUser')
+  leaveUser(client: Socket, userId: string) {
+    client.leave(`users:${userId}`);
+    const skO = this.usersOnline[userId].socketIds;
+    skO.splice(skO.indexOf(client.id), 1);
+    if (skO.length === 0) delete this.usersOnline[userId];
   }
 
   @SubscribeMessage('getFriendsOnline')
   async getFriendsOnline(_client: Socket, userId: string) {
     const { friends } = await this.usersModel.findById(userId).lean();
     const friendsIds = friends.map((friend) => friend.toString());
+    friendsIds.push(userId);
     friendsIds.forEach(async (friendId) => {
       if (this.usersOnline[friendId]) {
         const user = await this.usersModel.findById(friendId).lean();
         const friends = await this.usersModel
           .find({
-            _id: { $in: user.friends },
+            _id: {
+              $in: user.friends.filter(
+                (friend) => !!this.usersOnline[friend.toString()],
+              ),
+            },
           })
           .select('first_name last_name picture _id')
           .lean();
@@ -166,18 +191,13 @@ export class EventsGateway {
           userId: friend._id,
           userName: `${friend.first_name} ${friend.last_name}`,
           picture: friend.picture,
-          timeJoin: this.usersOnline[friend._id],
+          timeJoin: this.usersOnline[friend._id].timeJoin,
         }));
         this.server
           .to(`users:${friendId}`)
           .emit('getFriendsOnline', friendsOnline);
       }
     });
-  }
-
-  @SubscribeMessage('leaveUser')
-  leaveUser(client: Socket, userId: string) {
-    client.leave(`users:${userId}`);
   }
 
   @SubscribeMessage('joinPostCommentTyping')
