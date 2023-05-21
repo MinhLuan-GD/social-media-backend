@@ -212,6 +212,7 @@ export class UsersService implements IUsersService {
 
         const server = this.evenGateWay.server;
         server.to(`users:${receiverId}`).emit('cancelRequest', sender.username);
+        this.evenGateWay.getFriendsOnline(null, receiverId);
 
         return { friends, requests, sentRequests };
       } else throw new HttpException('Already Canceled', HttpStatus.CONFLICT);
@@ -305,6 +306,7 @@ export class UsersService implements IUsersService {
         server
           .to(`users:${senderId}`)
           .emit('friendRequestAccepted', notificationPayload);
+        this.evenGateWay.getFriendsOnline(null, senderId);
 
         const { friends, requests } = await this.usersModel
           .findById(receiverId)
