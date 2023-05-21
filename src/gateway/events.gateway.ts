@@ -15,6 +15,9 @@ import {
   StopTypingMessagePayload,
 } from './interfaces/payload';
 import { IUser } from './interfaces/user';
+import { InjectModel } from '@nestjs/mongoose';
+import { User, UserDocument } from '@/users/schemas/user.schema';
+import { Model } from 'mongoose';
 
 @WebSocketGateway({
   cors: {
@@ -30,6 +33,11 @@ export class EventsGateway {
     ACTIVE_USERS: 'ACTIVE_USERS',
     GROUP_CALL_ROOMS: 'GROUP_CALL_ROOMS',
   };
+
+  constructor(
+    @InjectModel(User.name)
+    private usersModel: Model<UserDocument>,
+  ) {}
 
   addUser(
     userId: string,
@@ -133,8 +141,20 @@ export class EventsGateway {
   }
 
   @SubscribeMessage('joinUser')
-  joinUser(client: Socket, userId: string) {
+  async joinUser(client: Socket, userId: string) {
     client.join(`users:${userId}`);
+    const allRooms = this.server.sockets.adapter.rooms;
+    const roomsArr = Array.from(allRooms.keys());
+    const usersRooms = roomsArr.filter((roomName) => /^users:/.test(roomName));
+    const userIds = usersRooms
+      .filter((value, index) => usersRooms.indexOf(value) === index)
+      .map((roomName) => roomName.split(':')[1]);
+    const { friends } = await this.usersModel.findById(userId).lean();
+    const friendsIds = friends.map((friend) => friend.toString());
+    const friendsOnline = friendsIds.filter((friendId) =>
+      userIds.includes(friendId),
+    );
+    this.server.to(client.id).emit('getFriendsOnline', friendsOnline);
   }
 
   @SubscribeMessage('leaveUser')
