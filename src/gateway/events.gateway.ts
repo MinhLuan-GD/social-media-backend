@@ -81,8 +81,7 @@ export class EventsGateway {
 
   @SubscribeMessage('call-other')
   callOther(_client: Socket, data: any) {
-    const user = this.getUser(data.receiveId);
-    this.server.to(user?.socketId).emit('call-other', {
+    this.server.to(`users${data.receiveId}`).emit('call-other', {
       callerUserId: data.senderId,
       callerUsername: data.username,
       callerPicture: data.picture,
