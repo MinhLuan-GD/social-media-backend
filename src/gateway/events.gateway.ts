@@ -151,9 +151,20 @@ export class EventsGateway {
       .map((roomName) => roomName.split(':')[1]);
     const { friends } = await this.usersModel.findById(userId).lean();
     const friendsIds = friends.map((friend) => friend.toString());
-    const friendsOnline = friendsIds.filter((friendId) =>
+    const friendsOnlineId = friendsIds.filter((friendId) =>
       userIds.includes(friendId),
     );
+    const usersFind = await this.usersModel.find(
+      {
+        _id: { $in: friendsOnlineId },
+      },
+      'first_name last_name picture _id',
+    );
+    const friendsOnline = usersFind.map((user) => ({
+      userId: user._id,
+      userName: `${user.first_name} ${user.last_name}`,
+      picture: user.picture,
+    }));
     this.server.to(client.id).emit('getFriendsOnline', friendsOnline);
   }
 
