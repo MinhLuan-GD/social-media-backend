@@ -91,45 +91,52 @@ export class EventsGateway {
   }
 
   @SubscribeMessage('sendNotification')
-  sendNotification(_client: Socket, data: SendNotificationPayload) {
-    const user = this.getUser(data.receiverId);
-    this.server.to(user?.socketId).emit('getNotification', data);
+  sendNotification(_client: Socket, payload: SendNotificationPayload) {
+    this.server
+      .to(`users:${payload.receiverId}`)
+      .emit('getNotification', payload);
   }
 
   @SubscribeMessage('stop typing message')
   stopTypingMessage(_client: Socket, payload: StopTypingMessagePayload) {
-    const user = this.getUser(payload.receiverId);
-    this.server.to(user?.socketId).emit('stop typing message', payload);
+    this.server
+      .to(`users:${payload.receiverId}`)
+      .emit('stop typing message', payload);
   }
 
   @SubscribeMessage('start typing message')
   startTypingMessage(_client: Socket, payload: StartTypingMessagePayload) {
-    const user = this.getUser(payload.receiverId);
-    this.server.to(user?.socketId).emit('start typing message', payload);
+    this.server
+      .to(`users:${payload.receiverId}`)
+      .emit('start typing message', payload);
   }
 
   @SubscribeMessage('messageSeenAll')
-  messageSeenAll(_client: Socket, data: MessageSeenAllPayload) {
-    const user = this.getUser(data.receiverId);
-    this.server.to(user?.socketId).emit('getMessageSeenAll', data);
+  messageSeenAll(_client: Socket, payload: MessageSeenAllPayload) {
+    this.server
+      .to(`users:${payload.receiverId}`)
+      .emit('getMessageSeenAll', payload);
   }
 
   @SubscribeMessage('messageSeen')
   messageSeen(_client: Socket, payload: MessageSeenPayload) {
-    const user = this.getUser(payload.message?.sender);
-    this.server.to(user?.socketId).emit('getMessageSeen', payload);
+    this.server
+      .to(`users:${payload.message?.sender}`)
+      .emit('getMessageSeen', payload);
   }
 
   @SubscribeMessage('messageDelivered')
   messageDelivered(_client: Socket, payload: MessageDeliveredPayload) {
-    const user = this.getUser(payload.message?.sender);
-    this.server.to(user?.socketId).emit('getMessageDelivered', payload);
+    this.server
+      .to(`users:${payload.message?.sender}`)
+      .emit('getMessageDelivered', payload);
   }
 
   @SubscribeMessage('sendMessage')
   sendMessage(_client: Socket, payload: SendMessagePayload) {
-    const user = this.getUser(payload.messages?.receiver);
-    this.server.to(user?.socketId).emit('getMessage', payload);
+    this.server
+      .to(`users:${payload.messages?.receiver}`)
+      .emit('getMessage', payload);
   }
 
   @SubscribeMessage('addUser')
