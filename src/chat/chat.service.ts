@@ -210,9 +210,10 @@ export class ChatService implements IChatService {
   }
 
   async deliveredAllConversations(userId: string) {
+    const { friends } = await this.usersModel.findById(userId).lean();
     const conversations = await this.conversationsModel
       .find({
-        members: { $elemMatch: { $eq: userId } },
+        members: { $elemMatch: { $eq: userId }, $in: friends },
       })
       .populate('members', 'first_name last_name picture')
       .select('-messages.updatedAt');
@@ -232,12 +233,7 @@ export class ChatService implements IChatService {
     });
 
     for (const id of userIds) {
-      const newConversations = await this.conversationsModel
-        .find({
-          members: { $elemMatch: { $eq: id } },
-        })
-        .populate('members', 'first_name last_name picture')
-        .select('-messages.updatedAt');
+      const newConversations = await this.conversations(id);
       this.evenGateWay.server
         .to(`users:${id}`)
         .emit('deliveredAllConversations', newConversations);

@@ -142,7 +142,6 @@ export class UsersController {
   @UseGuards(JwtAuthGuard)
   @Put('search/:searchTerm')
   async search(@Param('searchTerm') searchTerm: string) {
-    // console.log(`searching:::${searchTerm}`);
     return this.usersService.search(searchTerm);
   }
 
