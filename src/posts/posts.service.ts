@@ -131,25 +131,26 @@ export class PostsService implements IPostsService {
   }
 
   async checkTextToxicity(text: string): Promise<string[]> {
-    let toxicitySRes: any;
-    try {
-      toxicitySRes = await fetch(process.env.TOXICITY_URL, {
-        method: 'POST',
-        body: JSON.stringify({ text }),
-        headers: { 'Content-Type': 'application/json' },
-      });
-    } catch (error) {
-      console.log(error);
-      return;
-    }
-    const toxicitySData = await toxicitySRes.json();
-    const labels = [];
-    for (const key in toxicitySData) {
-      if (toxicitySData[key] === true) {
-        labels.push(key);
-      }
-    }
-    return labels;
+    // let toxicitySRes: any;
+    // try {
+    //   toxicitySRes = await fetch(process.env.TOXICITY_URL, {
+    //     method: 'POST',
+    //     body: JSON.stringify({ text }),
+    //     headers: { 'Content-Type': 'application/json' },
+    //   });
+    // } catch (error) {
+    //   console.log(error);
+    //   return;
+    // }
+    // const toxicitySData = await toxicitySRes.json();
+    // const labels = [];
+    // for (const key in toxicitySData) {
+    //   if (toxicitySData[key] === true) {
+    //     labels.push(key);
+    //   }
+    // }
+    // return labels;
+    return [];
   }
 
   async getAllPosts(id: string) {
@@ -295,8 +296,8 @@ export class PostsService implements IPostsService {
       };
 
       server
-          .to(`users:${post.user.toString()}`)
-          .emit('commentNotification', notificationPayload);
+        .to(`users:${post.user.toString()}`)
+        .emit('commentNotification', notificationPayload);
     }
 
     server.sockets.sockets.forEach((socket) => {
