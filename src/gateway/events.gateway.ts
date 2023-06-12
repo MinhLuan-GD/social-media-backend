@@ -66,7 +66,7 @@ export class EventsGateway {
       const userId = [...client.rooms]
         .find((s) => /users:/.test(s))
         ?.split(':')[1];
-      if (userId) {
+      if (userId && this.usersOnline[userId]) {
         const skO = this.usersOnline[userId].socketIds;
         skO.splice(skO.indexOf(client.id), 1);
         if (skO.length === 0) delete this.usersOnline[userId];
@@ -81,7 +81,7 @@ export class EventsGateway {
 
   @SubscribeMessage('call-other')
   callOther(_client: Socket, data: any) {
-    this.server.to(`users${data.receiveId}`).emit('call-other', {
+    this.server.to(`users:${data.receiveId}`).emit('call-other', {
       callerUserId: data.senderId,
       callerUsername: data.username,
       callerPicture: data.picture,
