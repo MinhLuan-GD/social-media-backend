@@ -69,7 +69,7 @@ spec:
     spec:
       containers:
         - name: api
-          image: akaluan/sm-api
+          image: akaluan/sm-api:notoxicity
           env:
             - name: PORT
               value: '80'

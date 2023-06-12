@@ -37,12 +37,12 @@ services:
       ORIGIN: http://localhost:3000
       THROTTLE_TTL: 100
       THROTTLE_LIMIT: 100
-      EMAIL: 
-      MAILING_ID: 
-      MAILING_SECRET: 
-      MAILING_REFRESH: 
-      CLOUD_NAME: 
-      CLOUD_API_KEY: 
+      EMAIL:
+      MAILING_ID:
+      MAILING_SECRET:
+      MAILING_REFRESH:
+      CLOUD_NAME:
+      CLOUD_API_KEY:
       CLOUD_API_SECRET:
     volumes:
       - .:/app
@@ -52,10 +52,6 @@ services:
     depends_on:
       - db
       - store
-
-  toxicity-service:
-    image: akaluan/toxicity:0.0.3
-    container_name: social-media-toxicity-service
 
 volumes:
   db: {}
