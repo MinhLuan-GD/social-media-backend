@@ -70,6 +70,7 @@ export class EventsGateway {
         const skO = this.usersOnline[userId].socketIds;
         skO.splice(skO.indexOf(client.id), 1);
         if (skO.length === 0) delete this.usersOnline[userId];
+        this.getFriendsOnline(null, userId);
       }
     });
   }
