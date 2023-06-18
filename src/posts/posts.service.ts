@@ -295,8 +295,8 @@ export class PostsService implements IPostsService {
       };
 
       server
-          .to(`users:${post.user.toString()}`)
-          .emit('commentNotification', notificationPayload);
+        .to(`users:${post.user.toString()}`)
+        .emit('commentNotification', notificationPayload);
     }
 
     server.sockets.sockets.forEach((socket) => {

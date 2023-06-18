@@ -30,45 +30,49 @@ export class ReactsService implements IReactsService {
     const check = await this.reactsModel.findOne({ reactBy, postRef });
     if (!check) {
       this.reactsModel.create({ reactBy, postRef, react });
-      const post = await this.postsModel.findById(postRef).lean();
-
-      if (post.user.toString() !== reactBy) {
-        const notification = await this.notificationsModel.create({
-          user: post.user,
-          icon: react,
-          text: 'reacted to your post',
-          from: reactBy,
-          postId: postRef,
-        });
-
-        const user = await this.usersModel.findById(reactBy).lean();
-
-        const notificationPayload = {
-          _id: notification._id,
-          user: post.user.toString(),
-          from: {
-            _id: user._id,
-            first_name: user.first_name,
-            last_name: user.last_name,
-            picture: user.picture,
-          },
-          icon: react,
-          postId: postRef,
-          text: notification.text,
-          createdAt: notification.createdAt,
-          updatedAt: notification.updatedAt,
-        };
-
-        this.evenGateWay.server
-          .to(`users:${post.user.toString()}`)
-          .emit('reactPostNotification', notificationPayload);
-      }
+      this.reactNotification(reactBy, postRef, react);
     } else if (check.react == react) {
       await this.reactsModel.findByIdAndRemove(check._id);
     } else {
+      this.reactNotification(reactBy, postRef, react);
       await this.reactsModel.findByIdAndUpdate(check._id, { $set: { react } });
     }
     return 'ok';
+  }
+
+  async reactNotification(reactBy: string, postRef: string, react: string) {
+    const post = await this.postsModel.findById(postRef).lean();
+    if (post.user.toString() !== reactBy) {
+      const notification = await this.notificationsModel.create({
+        user: post.user,
+        icon: react,
+        text: 'reacted to your post',
+        from: reactBy,
+        postId: postRef,
+      });
+
+      const user = await this.usersModel.findById(reactBy).lean();
+
+      const notificationPayload = {
+        _id: notification._id,
+        user: post.user.toString(),
+        from: {
+          _id: user._id,
+          first_name: user.first_name,
+          last_name: user.last_name,
+          picture: user.picture,
+        },
+        icon: react,
+        postId: postRef,
+        text: notification.text,
+        createdAt: notification.createdAt,
+        updatedAt: notification.updatedAt,
+      };
+
+      this.evenGateWay.server
+        .to(`users:${post.user.toString()}`)
+        .emit('reactPostNotification', notificationPayload);
+    }
   }
 
   async getReacts(reactBy: string, postRef: string) {
