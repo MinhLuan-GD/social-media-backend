@@ -44,7 +44,7 @@ export interface IUsersService {
 
   acceptRequest(senderId: string, receiverId: string): Promise<any>;
 
-  unfriend(senderId: string, receiverId: string): Promise<string>;
+  unfriend(senderId: string, receiverId: string): Promise<any>;
 
   deleteRequest(senderId: string, receiverId: string): Promise<any>;
 

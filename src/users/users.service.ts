@@ -354,7 +354,19 @@ export class UsersService implements IUsersService {
         });
         const server = this.evenGateWay.server;
         server.to(`users:${receiverId}`).emit('unfriend', sender.username);
-        return 'unfriend request accepted';
+
+        const { friends, requests } = await this.usersModel
+          .findById(senderId)
+          .select('friends requests')
+          .populate('friends', 'first_name last_name picture username')
+          .populate('requests', 'first_name last_name picture username')
+          .lean();
+        const sentRequests = await this.usersModel
+          .find({ requests: senderId })
+          .select('first_name last_name picture username')
+          .lean();
+
+        return { friends, requests, sentRequests };
       } else
         throw new HttpException('Already not friends', HttpStatus.CONFLICT);
     } else {
