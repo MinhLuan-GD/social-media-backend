@@ -2,7 +2,7 @@ import { CacheModule, Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { User, UserSchema } from './schemas/user.schema';
 import { Post, PostSchema } from '@/posts/schemas/post.schema';
-import { userCacheOpts } from '@/cache';
+// import { userCacheOpts } from '@/cache';
 import { UsersService } from './users.service';
 import { UsersController } from './users.controller';
 import { Services } from '@/utils/constants';
@@ -19,7 +19,7 @@ import {
       { name: Post.name, schema: PostSchema },
       { name: Notification.name, schema: NotificationSchema },
     ]),
-    CacheModule.registerAsync(userCacheOpts),
+    // CacheModule.registerAsync(userCacheOpts),
     EventsModule,
   ],
   providers: [

@@ -14,9 +14,10 @@ import {
   NotificationDocument,
   Notification,
 } from '@/notifications/schemas/notification.schema';
-import fetch from 'node-fetch';
+// import fetch from 'node-fetch';
 import { Server } from 'socket.io';
 import { EventsGateway } from '@/gateway/events.gateway';
+import { ToxicLabel, ToxicLabelDocument } from './schemas/toxic-label.schema';
 
 @Injectable()
 export class PostsService implements IPostsService {
@@ -27,6 +28,8 @@ export class PostsService implements IPostsService {
     private usersModel: Model<UserDocument>,
     @InjectModel(Notification.name)
     private notificationsModel: Model<NotificationDocument>,
+    @InjectModel(ToxicLabel.name)
+    private toxicLabelsModel: Model<ToxicLabelDocument>,
     @Inject(EventsGateway)
     private readonly evenGateWay: EventsGateway,
   ) {}
@@ -144,6 +147,15 @@ export class PostsService implements IPostsService {
     // }
     // const toxicitySData = await toxicitySRes.json();
     // const labels = [];
+    // await this.toxicLabelsModel.create({
+    //   text,
+    //   toxic: toxicitySData.toxic ? 1 : 0,
+    //   severe_toxic: toxicitySData.severe_toxicity ? 1 : 0,
+    //   obscene: toxicitySData.obscene ? 1 : 0,
+    //   threat: toxicitySData.threat ? 1 : 0,
+    //   insult: toxicitySData.insult ? 1 : 0,
+    //   identity_hate: toxicitySData.identity_hate ? 1 : 0,
+    // });
     // for (const key in toxicitySData) {
     //   if (toxicitySData[key] === true) {
     //     labels.push(key);

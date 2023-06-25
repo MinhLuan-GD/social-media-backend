@@ -32,12 +32,6 @@ class EnvironmentVariables {
   DB_URI: string;
 
   @IsString()
-  STORE_HOST: string;
-
-  @IsInt()
-  STORE_PORT: number;
-
-  @IsString()
   SECRET_KEY: string;
 
   @IsString()

@@ -33,11 +33,11 @@ export class UsersService implements IUsersService {
     private postsModel: Model<PostDocument>,
     @InjectModel(Notification.name)
     private notificationsModel: Model<NotificationDocument>,
-    @Inject(CACHE_MANAGER)
-    private cacheManager: Cache,
     @Inject(EventsGateway)
     private readonly evenGateWay: EventsGateway,
   ) {}
+
+  cache = {};
 
   async findUser(param: FindUserParams) {
     return this.usersModel.findOne(param).lean();
@@ -70,14 +70,13 @@ export class UsersService implements IUsersService {
     return this.usersModel.findOneAndUpdate(filter, data, options).lean();
   }
 
-  async setCode(user: string, code: string, ttl: number) {
-    await this.cacheManager.set(`users:${user}:code`, code, { ttl });
+  async setCode(user: string, code: string) {
+    this.cache[user] = code;
     return 'ok';
   }
 
   async getCode(user: string) {
-    const code = await this.cacheManager.get<string>(`users:${user}:code`);
-    return code;
+    return this.cache[user];
   }
 
   async getUserPicture(email: string) {
@@ -354,7 +353,19 @@ export class UsersService implements IUsersService {
         });
         const server = this.evenGateWay.server;
         server.to(`users:${receiverId}`).emit('unfriend', sender.username);
-        return 'unfriend request accepted';
+
+        const { friends, requests } = await this.usersModel
+          .findById(senderId)
+          .select('friends requests')
+          .populate('friends', 'first_name last_name picture username')
+          .populate('requests', 'first_name last_name picture username')
+          .lean();
+        const sentRequests = await this.usersModel
+          .find({ requests: senderId })
+          .select('first_name last_name picture username')
+          .lean();
+
+        return { friends, requests, sentRequests };
       } else
         throw new HttpException('Already not friends', HttpStatus.CONFLICT);
     } else {

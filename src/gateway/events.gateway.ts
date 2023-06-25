@@ -70,6 +70,7 @@ export class EventsGateway {
         const skO = this.usersOnline[userId].socketIds;
         skO.splice(skO.indexOf(client.id), 1);
         if (skO.length === 0) delete this.usersOnline[userId];
+        this.getFriendsOnline(null, userId);
       }
     });
   }
@@ -160,6 +161,7 @@ export class EventsGateway {
 
   @SubscribeMessage('joinUser')
   async joinUser(client: Socket, userId: string) {
+    console.log(`user: ${userId}  join with socket: ${client.id}`);
     client.join(`users:${userId}`);
     this.usersOnline[userId] = {
       timeJoin: new Date().toISOString(),
@@ -171,7 +173,8 @@ export class EventsGateway {
   @SubscribeMessage('leaveUser')
   leaveUser(client: Socket, userId: string) {
     client.leave(`users:${userId}`);
-    const skO = this.usersOnline[userId].socketIds;
+    const skO = this.usersOnline[userId]?.socketIds;
+    if (!skO) return;
     skO.splice(skO.indexOf(client.id), 1);
     if (skO.length === 0) delete this.usersOnline[userId];
   }

@@ -10,6 +10,7 @@ import {
   NotificationSchema,
 } from '@/notifications/schemas/notification.schema';
 import { EventsModule } from '@/gateway/events.module';
+import { ToxicLabel, ToxicLabelSchema } from './schemas/toxic-label.schema';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { EventsModule } from '@/gateway/events.module';
       { name: Post.name, schema: PostSchema },
       { name: User.name, schema: UserSchema },
       { name: Notification.name, schema: NotificationSchema },
+      { name: ToxicLabel.name, schema: ToxicLabelSchema },
     ]),
     EventsModule,
   ],

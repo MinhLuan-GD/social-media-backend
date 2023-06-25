@@ -100,7 +100,8 @@ export class AuthService extends AuthUtil implements IAuthService {
   async sendResetPasswordCode(email: string) {
     const user = await this.usersService.findUser({ email });
     const code = this.generateCode(5);
-    await this.usersService.setCode(user._id, code, 120);
+    // await this.usersService.setCode(user._id, code, 120);
+    await this.usersService.setCode(user._id, code);
     this.sendResetCode(user.email, user.first_name, code);
     return 'Email reset code has been sent to your email';
   }
