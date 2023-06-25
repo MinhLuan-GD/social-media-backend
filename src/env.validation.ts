@@ -26,9 +26,6 @@ class EnvironmentVariables {
   FONT_END_URL: string;
 
   @IsString()
-  TOXICITY_URL: string;
-
-  @IsString()
   DB_URI: string;
 
   @IsString()
