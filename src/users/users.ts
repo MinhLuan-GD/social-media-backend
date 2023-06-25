@@ -23,7 +23,7 @@ export interface IUsersService {
     options: UpdateOptions,
   ): Promise<User & { _id: string }>;
 
-  setCode(user: string, code: string, ttl: number): Promise<string>;
+  setCode(user: string, code: string): Promise<string>;
 
   getCode(user: string): Promise<string>;
 
