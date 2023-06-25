@@ -37,3 +37,6 @@ lerna-debug.log*
 
 # dotenv environment variables file
 *.env
+
+docker-compose.override.yml
+secret.yaml

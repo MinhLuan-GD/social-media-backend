@@ -1,0 +1,58 @@
+version: "3.9"
+
+services:
+  db:
+    container_name: social-media-db
+    image: mongo:latest
+    command: mongod
+    volumes:
+      - db:/data/db
+
+  store:
+    container_name: social-media-store
+    image: redis:latest
+    command: redis-server --save 60 1 --loglevel warning
+    volumes:
+      - store:/data
+
+  api:
+    build:
+      context: .
+      target: development
+      dockerfile: Dockerfile
+    command: yarn start:dev
+    container_name: social-media-api
+    environment:
+      NODE_ENV: development
+      PORT: 8000
+      BACK_END_URL: http://localhost:8000
+      FONT_END_URL: http://localhost:3000
+      TOXICITY_URL: http://toxicity-service/score-comment
+      DB_URI: mongodb://db:27017/sm
+      STORE_HOST: store
+      STORE_PORT: 6379
+      SECRET_KEY: secret123
+      EXPIRES_IN: 7d
+      ALGORITHM: HS256
+      ORIGIN: http://localhost:3000
+      THROTTLE_TTL: 100
+      THROTTLE_LIMIT: 100
+      EMAIL:
+      MAILING_ID:
+      MAILING_SECRET:
+      MAILING_REFRESH:
+      CLOUD_NAME:
+      CLOUD_API_KEY:
+      CLOUD_API_SECRET:
+    volumes:
+      - .:/app
+      - /app/node_modules
+    ports:
+      - 8000:8000
+    depends_on:
+      - db
+      - store
+
+volumes:
+  db: {}
+  store: {}
